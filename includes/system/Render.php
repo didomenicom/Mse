@@ -145,7 +145,7 @@ class Render {
 		$class = "ComponentRender" . $type;
 		
 		if(!class_exists($class)){
-			ImportClass("Render.Render." . strtolower($type));
+			ImportClass("Render.Render." . ($type));
 		}
 		
 		if(!class_exists($class)){
