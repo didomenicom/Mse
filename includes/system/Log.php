@@ -16,7 +16,7 @@ define("LG_INFO", 4);
 define("LG_DEBUG", 5);
 define("LG_ACTION", 6); // Log for user actions
 
-require_once BASEPATH . "/libraries/system/log/Log.php";
+require_once(BASEPATH.INCLUDES . '/log/Log.php');
 
 /**
  * This function replaces the standard PHP error handler. 
