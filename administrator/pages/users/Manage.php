@@ -41,60 +41,65 @@ function Manage(){
 		?>
 		<script type="text/javascript">
 		$(document).ready(function(){ 
-			$("#filter_userPermissionGroup").change(function(){
-				var optionSelect = this;
+			$("#filter_userPermissionGroup").change(function(e){
+				var selectVal = $(this).find("option:selected").val();
+				
 				$.ajax({
 					type: "POST",
 					url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
 					async: true,
 					timeout: 50000,
-					data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateUserList", val: $(optionSelect).find("option:selected").val()},
+					data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateUserList", val: selectVal},
 					success: function(data){
-						if(data != ""){
-							var rowArray = data.split("**|||**");
-
-							if(rowArray.length > 0){
-								// There are new rows, clear current rows 
-								$("#manageTable tbody").html("");
-								var totalRowCount = 0;
-								
-								for(var i = 0; i < rowArray.length; i++){
-									// Loop through and handle each row 
-									var rowVal = rowArray[i];
-									var str = "";
-									var rowTdArray = rowVal.split("||");
-
-									if(rowTdArray.length == 6){
-										for(var x = 0; x < rowTdArray.length; x++){
-											str = str + "<td>" + rowTdArray[x] + "</td>";
-										}
-										
-										var options = '<ul class="nav" style="margin-top: 0px; margin-bottom: 0px;">' + 
-														'<li class="dropdown">' + 
-															'<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="margin-top: 0px; margin-bottom: 0px;">' + (i + 1) + '</a>' + 
-															'<ul class="dropdown-menu">' + 
-																'<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=edit&id=' + rowTdArray[(rowTdArray.length - 1)] + '"><i class="icon-pencil"></i> Edit</a></li>' + 
-																'<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=delete&id=' + rowTdArray[(rowTdArray.length - 1)] + '"><i class="icon-trash"></i> Delete</a></li>' + 
-															'</ul>' + 
-														'</li>' + 
-													'</ul>';
-										
-										$('#manageTable > tbody').append("<tr><td>" + options + "</td>" + str + "</tr>");
-										totalRowCount++;
-									}
-								}
-
-								// Handle the footer 
-								$("#tableFooterRowCount").html((totalRowCount > 0 ? "1" : "0") + " - " + totalRowCount + " of " + totalRowCount + " records");
-							}
-						}
+						updateRows(data);
 					}
 				});
 			});
+			
+			$("#filter_userSearch").live("keyup", function(e){
+				var searchStr = $(this).val();
+
+				if(searchStr !== ""){
+					$.ajax({
+						type: "POST",
+						url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
+						async: true,
+						timeout: 50000,
+						data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateSearch", val: searchStr},
+						success: function(data){
+							updateRows(data);
+						}
+					});
+				} else {
+					$.ajax({
+						type: "POST",
+						url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
+						async: true,
+						timeout: 50000,
+						data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateUserList", val: 0},
+						success: function(data){
+							updateRows(data);
+						}
+					});
+				}
+			});
+			
+		    function updateRows(data){
+				if(data == 0){
+					$("#manageTable tbody").html("");
+				}
+				
+				if(data != "" && data != 0){
+					$("#manageTable tbody").html(data);
+				}
+				
+				// Handle the footer 
+				var totalRowCount = (data != "" && data != 0 ? $('#manageTable tbody tr').length : 0);
+				
+				$("#tableFooterRowCount").html((totalRowCount > 0 ? "1" : "0") + " - " + totalRowCount + " of " + totalRowCount + " records");
+		    }
 		});
 		</script>
-		<div id="textTmp"></div>
-		<div id="textDbg"></div>
 		<form name="adminForm" method="post" action="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=manage">
 			<?php
 			if($items->rowsExist()){
@@ -103,9 +108,9 @@ function Manage(){
 				<thead>
 					<tr>
 						<th colspan="7">
-							<div class="input-append pull-left">
-								<input type="text" name="filter_userSearch" id="filter_userSearch">
-								<button class="btn" type="button"><i class="icon-search"></i> Search</button>
+							<div class="input-prepend pull-left dropdown">
+								<span class="add-on"><i class="icon-search"></i> Search </span>
+								<input type="text" name="filter_userSearch" id="filter_userSearch" autocomplete="off">
 							</div>
 							<div class="pull-right">
 								<select name="filter_userPermissionGroup" id="filter_userPermissionGroup">
@@ -198,20 +203,20 @@ function Manage(){
 							<td align="center" colspan="7">
 								<div class="pull-left span5">
 									<span id="tableFooterRowCount"><?php echo $items->getStartNumber() . " - " . (($items->getStartNumber() + $items->getRowCount()) - 1) . " of " . $items->getTotalRows() . " records"; ?></span> 
-										<?php
-										if($items->getRowCount() != $items->getTotalRows()){
-										?>
-										<select class="span2" style="margin-bottom:0px;">
-											<option>1</option>
-											<option>2</option>
-											<option>3</option>
-											<option>4</option>
-											<option>5</option>
-										</select>
-										<span>Per Page</span>
-										<?php
-										}
-										?>
+									<?php
+									if($items->getRowCount() != $items->getTotalRows()){
+									?>
+									<select class="span2" style="margin-bottom:0px;">
+										<option>1</option>
+										<option>2</option>
+										<option>3</option>
+										<option>4</option>
+										<option>5</option>
+									</select>
+									<span>Per Page</span>
+									<?php
+									}
+									?>
 								</div>
 								<?php
 								if($items->getRowCount() != $items->getTotalRows()){

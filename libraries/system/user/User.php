@@ -334,5 +334,42 @@ class User extends Library {
 		
 		return false;
 	}
+	
+	/**
+	 * Returns the terms based on the input value
+	 */
+	public static function search($inputValue, $deleted = false){
+		global $db;
+		
+		if(isset($inputValue) && $inputValue !== ""){
+			$inputValue = addslashes($inputValue);
+			$outputArray = array();
+			
+			if($deleted == false){
+				$deleted = "deleted='0000-00-00 00:00:00'";
+			} else {
+				$deleted = "deleted != '0000-00-00 00:00:00'";
+			}
+			
+			$resultCount = $db->fetchObject("SELECT `users`.id FROM `users` " . 
+					"LEFT JOIN `permissionGroups` ON `users`.permissionGroup=`permissionGroups`.id WHERE " . $deleted . " AND (" . 
+					"`users`.name LIKE '%" . $inputValue . "%' OR " . 
+					"`users`.username LIKE '%" . $inputValue . "%' OR " . 
+					"`users`.email LIKE '%" . $inputValue . "%' OR " . 
+					"`permissionGroups`.name LIKE '%" . $inputValue . "%')");
+			
+			if($resultCount > 0){
+				while($db->fetchObjectHasNext() == true){
+					$row = $db->fetchObjectGetNext();
+					
+					array_push($outputArray, $row->id);
+				}
+				
+				$db->fetchObjectDestroy();
+			}
+			
+			return $outputArray;
+		}
+	}
 }
 ?>
