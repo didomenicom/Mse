@@ -35,7 +35,6 @@ class Users extends ClassesLibrary {
 		// Filters
 		$filterString = ClassesLibrary::generateFilterString($filter, $filterArray, $filterLogic);
 		
-		
 		// Execute query
 		$rowsCount = $db->fetchObject("SELECT id FROM users" . $filterString . ClassesLibrary::generateSortingString() . ClassesLibrary::generateRowsCountString());
 		

@@ -217,7 +217,7 @@ class UserSession {
 		
 		if(isset($this->sessionId)){
 			// Session exists
-			$result = $db->insert("UPDATE sessions SET " . 
+			$result = $db->update("UPDATE sessions SET " . 
 				"userId='" . self::getUserId() . "', " . 
 				"removeTimeStamp='" . self::getRemoveTimeStamp() . "', " . 
 				"ipAddress='" . self::getIpAddress() . "', " . 
@@ -312,6 +312,7 @@ class UserSession {
 				// Found an id already in the database... try again
 				return self::generateSessionId();
 			}
+			
 			$db->fetchObjectDestroy();
 		}
 		

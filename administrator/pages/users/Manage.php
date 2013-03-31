@@ -37,54 +37,70 @@ function Manage(){
 		$filter['permissionGroup'] = (Session::get('filter_userPermissionGroup') != NULL ? Session::get('filter_userPermissionGroup') : NULL);
 		$items = new Users($filter);
 		
+		// TODO: Add to header (render class function)
 		?>
 		<script type="text/javascript">
 		$(document).ready(function(){ 
 			$("#filter_userPermissionGroup").change(function(){
-				alert($(this).find("option:selected").html());
+				//alert($(this).find("option:selected").html());
+				var optionSelect = this;
 				$.ajax({
 					type: "POST",
-					url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?option=jquery&act=users",
+					url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
 					async: true,
 					timeout: 50000,
-					data: {name: "filter_userPermissionGroup", val: $(this).find("option:selected").val()},
+					data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateUserList", val: $(optionSelect).find("option:selected").val()},
 					success: function(data){
-						alert(data);
-						
 						if(data != ""){
-							var parts = data.split("-");
-							var id = parts[0];
-							var value = parts[1];
-							
-					//		alert($(this).serialize());
-							if($(this).val() == value){
-								// Success
-					//			$(this).toggleClass(changeSuccess);
-					//			alert("A");
-								//$(this).css({'background-color': '#CCFFDD'});
-								//getData();
-							} else {
-								// Error
-				//				$(this).toggleClass(changeError);
-					//			alert("B");
-								//$(this).css({'background-color': '#FF7A7A'});
+							var rowArray = data.split("**|||**");
+
+							if(rowArray.length > 0){
+								// There are new rows, clear current rows 
+								$("#manageTable tbody").html("");
+								var totalRowCount = 0;
+								
+								for(var i = 0; i < rowArray.length; i++){
+									// Loop through and handle each row 
+									var rowVal = rowArray[i];
+									var str = "";
+									var rowTdArray = rowVal.split("||");
+
+									if(rowTdArray.length == 6){
+										for(var x = 0; x < rowTdArray.length; x++){
+											str = str + "<td>" + rowTdArray[x] + "</td>";
+										}
+										
+										var options = '<ul class="nav" style="margin-top: 0px; margin-bottom: 0px;">' + 
+														'<li class="dropdown">' + 
+															'<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="margin-top: 0px; margin-bottom: 0px;">' + (i + 1) + '</a>' + 
+															'<ul class="dropdown-menu">' + 
+																'<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=edit&id=' + rowTdArray[(rowTdArray.length - 1)] + '"><i class="icon-pencil"></i> Edit</a></li>' + 
+																'<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=delete&id=' + rowTdArray[(rowTdArray.length - 1)] + '"><i class="icon-trash"></i> Delete</a></li>' + 
+															'</ul>' + 
+														'</li>' + 
+													'</ul>';
+										
+										$('#manageTable > tbody').append("<tr><td>" + options + "</td>" + str + "</tr>");
+										totalRowCount++;
+									}
+								}
+
+								// Handle the footer 
+								$("#tableFooterRowCount").html((totalRowCount > 0 ? "1" : "0") + " - " + totalRowCount + " of " + totalRowCount + " records");
 							}
-						} else {
-							// Save error
-				//			$(this).toggleClass(changeError);
-					//		alert("C");
-						//	$(this).css({'background-color': '#FF7A7A'});
 						}
 					}
 				});
 			});
 		});
 		</script>
+		<div id="textTmp"></div>
+		<div id="textDbg"></div>
 		<form name="adminForm" method="post" action="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=manage">
 			<?php
 			if($items->rowsExist()){
 			?>
-			<table class="table table-bordered table-striped table-hover">
+			<table id="manageTable" class="table table-bordered table-striped table-hover">
 				<thead>
 					<tr>
 						<th colspan="7">
@@ -182,7 +198,7 @@ function Manage(){
 						<tr>
 							<td align="center" colspan="7">
 								<div class="pull-left span5">
-									<span><?php echo $items->getStartNumber() . " - " . (($items->getStartNumber() + $items->getRowCount()) - 1) . " of " . $items->getTotalRows() . " records"; ?></span> 
+									<span id="tableFooterRowCount"><?php echo $items->getStartNumber() . " - " . (($items->getStartNumber() + $items->getRowCount()) - 1) . " of " . $items->getTotalRows() . " records"; ?></span> 
 										<?php
 										if($items->getRowCount() != $items->getTotalRows()){
 										?>

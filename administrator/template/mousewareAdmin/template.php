@@ -10,8 +10,8 @@
 <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'></script>
 <script type='text/javascript' src="<?php echo Url::getAdminHttpBase('template'); ?>/mousewareAdmin/bootstrap/js/bootstrap.min.js"></script>
 <script type='text/javascript' src="<?php echo Url::getAdminHttpBase('template'); ?>/mousewareAdmin/js/bootbox.min.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo Url::getAdminHttpBase('template'); ?>/mousewareAdmin/bootstrap/css/bootstrap-responsive.css">
-<link rel="stylesheet" type="text/css" href="<?php echo Url::getAdminHttpBase('template'); ?>/mousewareAdmin/bootstrap/css/bootstrap.css">
+<link rel="stylesheet" type="text/css" href="<?php echo Url::getAdminHttpBase('template'); ?>/mousewareAdmin/bootstrap/css/bootstrap-responsive.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo Url::getAdminHttpBase('template'); ?>/mousewareAdmin/bootstrap/css/bootstrap.css" />
 
 <style type="text/css">
 body {

@@ -44,7 +44,7 @@ class Importer {
 						return true;
 					} else {
 						// File doesn't exist
-						Log::warn("Importer: add -- file not found - filename = '" . $path . "' class = '" . $className . "'");
+						Log::error("Importer: add -- file not found - filename = '" . $path . "' class = '" . $className . "'");
 					}
 				}
 			}

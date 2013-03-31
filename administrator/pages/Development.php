@@ -13,7 +13,12 @@ switch(Url::getParts('act')){
 		Tasks();
 		break;
 	
-	default:
+	case 'ajaxHandler':
+		ImportFile(Url::getAdminDirBase() . DS . "pages/development/AjaxHandler.php");
+		Tasks();
+		break;
+	
+		default:
 		// Unknown state
 		echo "Unknown Error";
 		
