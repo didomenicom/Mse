@@ -24,6 +24,11 @@ switch(Url::getParts('act')){
 		Delete();
 		break;
 	
+	case 'details':
+		ImportFile(Url::getAdminDirBase() . DS . "pages/users/Details.php");
+		Details();
+		break;
+	
 	default:
 		// Unknown state
 		echo "Unknown Error";

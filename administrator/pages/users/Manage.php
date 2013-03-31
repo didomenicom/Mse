@@ -169,6 +169,7 @@ function Manage(){
 									<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="margin-top: 0px; margin-bottom: 0px;"><?php echo $cnt; ?></a>
 									<ul class="dropdown-menu">
 										<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=edit&id=<?php echo $row->getId(); ?>"><i class="icon-pencil"></i> Edit</a></li>
+										<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=details&id=<?php echo $row->getId(); ?>"><i class="icon-list-alt"></i> Details</a></li>
 										<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=delete&id=<?php echo $row->getId(); ?>"><i class="icon-trash"></i> Delete</a></li>
 									</ul>
 								</li>

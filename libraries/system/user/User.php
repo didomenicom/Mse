@@ -55,8 +55,6 @@ class User extends Library {
 			$this->recordText['email'] = "Email Address";
 			$this->recordGets['email'] = "getEmail";
 			$this->recordInfo['password'] = $info->password;
-			$this->recordText['password'] = "Password";
-			$this->recordGets['password'] = "getPassword";
 			$this->recordInfo['permissionGroup'] = $info->permissionGroup;
 			$this->recordText['permissionGroup'] = "Permission Group";
 			$this->recordGets['permissionGroup'] = "getPermissionGroup";
