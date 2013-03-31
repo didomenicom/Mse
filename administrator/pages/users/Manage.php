@@ -42,7 +42,6 @@ function Manage(){
 		<script type="text/javascript">
 		$(document).ready(function(){ 
 			$("#filter_userPermissionGroup").change(function(){
-				//alert($(this).find("option:selected").html());
 				var optionSelect = this;
 				$.ajax({
 					type: "POST",
