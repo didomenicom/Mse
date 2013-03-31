@@ -49,7 +49,7 @@ function Manage(){
 					url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
 					async: true,
 					timeout: 50000,
-					data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateUserList", val: selectVal},
+					data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateUserList", val: selectVal, deleted: <?php echo ($viewDeleted == true ? 1 : 0); ?>},
 					success: function(data){
 						updateRows(data);
 					}
@@ -65,7 +65,7 @@ function Manage(){
 						url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
 						async: true,
 						timeout: 50000,
-						data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateSearch", val: searchStr},
+						data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateSearch", val: searchStr, deleted: <?php echo ($viewDeleted == true ? 1 : 0); ?>},
 						success: function(data){
 							updateRows(data);
 						}
@@ -76,7 +76,7 @@ function Manage(){
 						url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
 						async: true,
 						timeout: 50000,
-						data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateUserList", val: 0},
+						data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateUserList", val: 0, deleted: <?php echo ($viewDeleted == true ? 1 : 0); ?>},
 						success: function(data){
 							updateRows(data);
 						}

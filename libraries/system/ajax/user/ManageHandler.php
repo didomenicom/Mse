@@ -14,7 +14,7 @@ function Handler($task){
 			// Grab the walker class
 			ImportClass("User.Users");
 			
-			$filter['deleted'] = (isset($_GET['deleted']) && $_GET['deleted'] == 1 ? true : false);
+			$filter['deleted'] = (isset($_POST['deleted']) && $_POST['deleted'] == 1 ? true : false);
 			
 			$filter['permissionGroup'] = (isset($_POST["val"]) && $_POST["val"] > 0 ? $_POST["val"] : NULL);
 			$items = new Users($filter);
@@ -65,7 +65,7 @@ function Handler($task){
 					// Grab the class
 					ImportClass("User.User");
 					
-					$resultsArray = User::search($_POST['val'], (Url::getParts('deleted') == 1 ? true : false));
+					$resultsArray = User::search($_POST['val'], (isset($_POST['deleted']) && $_POST['deleted'] == 1 ? true : false));
 					
 					$cnt = 1;
 					foreach($resultsArray as $resultId){

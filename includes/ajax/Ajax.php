@@ -64,7 +64,6 @@ class Ajax {
 					}
 				}
 			}
-			
 		}
 		
 		return false;
