@@ -19,7 +19,7 @@ function Edit(){
 		
 		if($result == 0){
 			// Display the page text
-			echo Text::pageTitle((Url::getParts('act') === "edit" ? "Edit" : "Add") . " Ajax Handler");
+			echo Text::pageTitle((Url::getParts('task') === "edit" ? "Edit" : "Add") . " Ajax Handler");
 			?>
 			<script type="text/javascript">
 			function checkForm(){
