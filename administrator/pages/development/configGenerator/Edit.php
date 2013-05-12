@@ -46,7 +46,22 @@ function Edit(){
 				<div class="control-group">
 					<label class="control-label" for="inputComponent">Component</label>
 					<div class="controls">
-						<input type="text" name="inputComponent" id="inputComponent" value="<?php echo ($id > 0 ? $data->getComponent(1) : ""); ?>" />
+						<select name="inputComponent" id="inputComponent">
+							<option value=""<?php echo ($id > 0 ? ($data->getComponent() == 0 ? " selected=\"selected\"" : "") : " selected=\"selected\""); ?>>- Select -</option>
+							<?php
+							ImportClass("Component.Components");
+							
+							$components = new Components();
+							if($components->rowsExist()){
+								while($components->hasNext()){
+									$row = $components->getNext();
+							?>
+							<option value="<?php echo $row->getId(); ?>"<?php echo ($id > 0 ? ($data->getComponent() == $row->getId() ? " selected=\"selected\"" : "") : ""); ?>><?php echo $row->getName(); ?></option>
+							<?php 
+								}
+							}
+							?>
+						</select>
 					</div>
 				</div>
 				<div class="control-group">
@@ -58,11 +73,10 @@ function Edit(){
 							ImportClass("Config.ConfigTypes");
 							
 							if(ConfigTypes::rowsExist()){
-								
 								while(ConfigTypes::hasNext()){
 									$row = ConfigTypes::getNext();
 							?>
-							<option value="<?php echo $row['id']; ?>"<?php echo ($id > 0 ? ($data->getType() == $row['id'] ? " selected=\"selected\"" : "") : ""); ?>><?php echo $row['name']?></option>
+							<option value="<?php echo $row['id']; ?>"<?php echo ($id > 0 ? ($data->getType() == $row['id'] ? " selected=\"selected\"" : "") : ""); ?>><?php echo $row['name']; ?></option>
 							<?php 
 								}
 							}
@@ -82,7 +96,6 @@ function Edit(){
 						<button type="button" class="btn" onClick="return cancel();">Cancel</button>
 					</div>
 				</div>
-				<input type="hidden" name="userId" id="userId" value="<?php echo $id; ?>" />
 			</form>
 			<?php
 		}
@@ -113,14 +126,14 @@ function Edit(){
 				$data->setType($info['inputType']);
 				$data->setName($info['inputName']);
 				
-				if($data->save() == true){
+				if($data->save() > 0){
 					if($id > 0){
 						Messages::setMessage("Config Saved", Define::get("MessageLevelSuccess"));
 					} else {
 						Messages::setMessage("Config Added", Define::get("MessageLevelSuccess"));
 					}
 				} else {
-					Messages::setMessage("Config NOT Saved!", Define::get("MessageLevelError"));
+					Messages::setMessage("Config not saved", Define::get("MessageLevelError"));
 				}
 				
 				Url::redirect(Url::getAdminHttpBase() . "/index.php?option=development&act=configGenerator&task=manage", 0, false);

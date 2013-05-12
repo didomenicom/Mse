@@ -50,18 +50,29 @@ class ConfigOption extends Library {
 			$this->recordInfo['type'] = $info->type;
 			$this->recordText['type'] = "Type";
 			$this->recordGets['type'] = "getType";
+			$this->recordInfo['options'] = $info->options;
+			$this->recordText['options'] = "Options";
+			$this->recordGets['options'] = "getOptions";
 			$this->recordInfo['name'] = $info->name;
 			$this->recordText['name'] = "Name";
 			$this->recordGets['name'] = "getName";
 			$this->recordInfo['value'] = $info->value;
 			$this->recordText['value'] = "Value";
 			$this->recordGets['value'] = "getValue";
+			$this->recordInfo['deleteCheck'] = $info->deleteCheck;
+			$this->recordText['deleteCheck'] = "Delete Check";
+			$this->recordGets['deleteCheck'] = "getDeleteCheck";
 		}
 	}
 	
 	public function getComponent($text = 0){
 		if($text == 1){
-			return stripslashes($this->recordInfo['component']);
+			if($this->recordInfo['component'] !== ""){
+				ImportClass("Component.Component");
+				
+				$component = new Component($this->recordInfo['component']);
+				return $component->getName();
+			}
 		} else {
 			return $this->recordInfo['component'];
 		}
@@ -89,6 +100,23 @@ class ConfigOption extends Library {
 	public function setType($inputValue){
 		if(isset($inputValue)){
 			$this->recordInfo['type'] = $inputValue;
+			return 1;
+		}
+		
+		return 0;
+	}
+	
+	public function getOptions($text = 0){
+		if($text == 1){
+			return stripslashes($this->recordInfo['options']);
+		} else {
+			return $this->recordInfo['options'];
+		}
+	}
+	
+	public function setOptions($inputValue){
+		if(isset($inputValue)){
+			$this->recordInfo['options'] = $inputValue;
 			return 1;
 		}
 		
@@ -129,6 +157,23 @@ class ConfigOption extends Library {
 		return 0;
 	}
 	
+	public function getDeleteCheck($text = 0){
+		if($text == 1){
+			return stripslashes($this->recordInfo['deleteCheck']);
+		} else {
+			return $this->recordInfo['deleteCheck'];
+		}
+	}
+	
+	public function setDeleteCheck($inputValue){
+		if(isset($inputValue)){
+			$this->recordInfo['deleteCheck'] = $inputValue;
+			return 1;
+		}
+		
+		return 0;
+	}
+	
 	public function canDelete(){
 		return true; // TODO: Finish
 	}
@@ -143,6 +188,7 @@ class ConfigOption extends Library {
 		return false;
 	}
 	
+	// TODO: Redefine return to true or false. Optionally enter pointer to store number of records modified. 
 	public function save(){
 		global $db;
 		if($this->recordInfo['id'] > 0){
@@ -152,12 +198,18 @@ class ConfigOption extends Library {
 				"name='" . addslashes(self::getName()) . "', " . 
 				"value='" . addslashes(self::getValue()) . "' " . 
 				"WHERE id=" . addslashes(self::getId()));
-		
-			if($result == true){
+			
+			if($result == 1){
 				$changes = "";
 				self::determineClassChanges($this, $changes, $this->recordText);
 				
 				Log::action("Config (" . self::getId() . ") edited: " . ($changes != "" ? $changes : "None"));
+			} else {
+				// Nothing was updated. Check if this was a failure or no updates needed
+				$changes = "";
+				self::determineClassChanges($this, $changes, $this->recordText);
+				
+				$result = ($changes === "" ? true : false);
 			}
 		} else {
 			$result = $db->insert("INSERT INTO config (component, type, name, value) VALUES (" . 
@@ -165,8 +217,8 @@ class ConfigOption extends Library {
 				"'" . addslashes(self::getType()) . "', " . 
 				"'" . addslashes(self::getName()) . "', " . 
 				"'" . addslashes(self::getValue()) . "')");
-				
-			if($result == true){
+			
+			if($result == 1){
 				Log::action("Config (" . self::getId() . ") added");
 			}
 		}

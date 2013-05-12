@@ -2,42 +2,36 @@
 /**
  * MseBase - PHP system to develop web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
+ * @copyright 2013 Mike Di Domenico
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
 defined("Access") or die("Direct Access Not Allowed");
 
 ImportClass("ClassesLibrary");
 
-class ConfigOptions extends ClassesLibrary {
+class Components extends ClassesLibrary {
 	private $recordIndex = 0;
 	private $recordQueryArray = array();
 	private $filter;
 	private $rowCount = 0;
+	private $totalRows = 0;
 	
-	public function ConfigOptions($filter = 0){
+	public function Components($filter = array()){
 		global $db;
 		
-		// Build array to generate filtering string
-		$filterArray = array("component");
-		$filterLogic = array();
-		
-		// Filters
-		$filterString = ClassesLibrary::generateFilterString($filter, $filterArray, $filterLogic);
-		
 		// Execute query
-		$rowsCount = $db->fetchObject("SELECT id FROM config" . $filterString . ClassesLibrary::generateSortingString() . ClassesLibrary::generateRowsCountString());
+		$rowsCount = $db->fetchObject("SELECT name FROM components" . ClassesLibrary::generateSortingString() . ClassesLibrary::generateRowsCountString());
 		
 		if($rowsCount > 0){
-			ImportClass("Config.ConfigOption");
+			ImportClass("Component.Component");
 			
 			while($db->fetchObjectHasNext() == true){
 				$row = $db->fetchObjectGetNext();
 				
-				$this->recordQueryArray[$this->rowCount] = new ConfigOption($row->id);
+				$this->recordQueryArray[$this->rowCount] = new Component($row->name);
 				$this->rowCount++;
+				$this->totalRows++;
 			}
-			
 			$db->fetchObjectDestroy();
 		}
 	}
@@ -60,9 +54,16 @@ class ConfigOptions extends ClassesLibrary {
 		return ($this->rowCount > 0);
 	}
 	
-	private function getRowCount(){
+	public function getRowCount(){
 		return $this->rowCount;
 	}
+	
+	public function getTotalRows(){
+		return $this->totalRows;
+	}
+	
+	public function getStartNumber(){
+		return 1;
+	}
 }
-
 ?>

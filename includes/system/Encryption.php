@@ -12,7 +12,7 @@ ImportClass('Encryption.Encryption');
 
 // Setup the keys
 global $Config;
-Encryption::setIv($Config->getVar('encryption_iv'));
-Encryption::setKey($Config->getVar('encryption_key'));
+Encryption::setIv($Config->getSystemVar('encryption_iv'));
+Encryption::setKey($Config->getSystemVar('encryption_key'));
 
 ?>

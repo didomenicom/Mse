@@ -36,7 +36,7 @@ class Cookie extends SuperGlobal {
 				$inputExpire += time() + time();
 			}
 			
-			$result = setcookie($inputName, $inputValue, $inputExpire, "/", $Config->getVar("cookieDomain"));
+			$result = setcookie($inputName, $inputValue, $inputExpire, "/", $Config->getSystemVar("cookieDomain"));
 			
 			if($result == true){
 				$_COOKIE[$inputName] = $inputValue;
@@ -54,7 +54,7 @@ class Cookie extends SuperGlobal {
 		global $Config;
 		
 		if(isset($inputName) && self::exists($inputName) == true){
-			$result = setcookie($inputName, "", (time() - 3600), "/", $Config->getVar("cookieDomain"));
+			$result = setcookie($inputName, "", (time() - 3600), "/", $Config->getSystemVar("cookieDomain"));
 			
 			if($result == true){
 				unset($_COOKIE[$inputName]);

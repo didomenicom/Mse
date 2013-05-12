@@ -18,7 +18,7 @@ class Db {
 		global $Config;
 		
 		// Check to see what type of database is being used
-		switch($Config->getVar('database_Type')){
+		switch($Config->getSystemVar('database_Type')){
 			case "mysql":
 				// Create a mysql database and pass all calls to it
 				ImportClass("Database.Mysql.Mysql");

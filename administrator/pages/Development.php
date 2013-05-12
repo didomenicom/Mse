@@ -18,7 +18,12 @@ switch(Url::getParts('act')){
 		Tasks();
 		break;
 	
-		default:
+	case 'configGenerator':
+		ImportFile(Url::getAdminDirBase() . DS . "pages/development/ConfigGenerator.php");
+		Tasks();
+		break;
+	
+	default:
 		// Unknown state
 		echo "Unknown Error";
 		

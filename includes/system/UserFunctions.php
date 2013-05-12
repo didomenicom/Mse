@@ -24,12 +24,12 @@ class UserFunctions {
 		if(UserFunctions::$userInfo == NULL){
 			
 			// Check if a session exists
-			if(Cookie::exists($Config->getVar('cookieName')) == true){
+			if(Cookie::exists($Config->getSystemVar('cookieName')) == true){
 				
 				ImportClass("User.UserSession");
 				
 				// 1. Find the cookie
-				$sessionId = Cookie::get($Config->getVar('cookieName'));
+				$sessionId = Cookie::get($Config->getSystemVar('cookieName'));
 				
 				// 2. Create the UserSession
 				$userSession = new UserSession($sessionId);

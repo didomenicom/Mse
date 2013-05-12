@@ -14,7 +14,7 @@ class ComponentRenderHeader extends ComponentRender {
 			switch($name){
 				case "title":
 					// This is the site title... grab from global config
-					return $Config->getVar('siteTitle');
+					return $Config->getSystemVar('siteTitle');
 					break;
 				default:
 					Log::fatal("ComponentRenderHeader: render -- unknown name variable - name = '" . $name . "'");

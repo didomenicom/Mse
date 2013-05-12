@@ -19,7 +19,7 @@ class Date {
 	 */
 	public static function setSystemTimezone(){
 		global $Config;
-		date_default_timezone_set($Config->getVar('systemTimezone'));
+		date_default_timezone_set($Config->getSystemVar('systemTimezone'));
 	}
 	
 	/**

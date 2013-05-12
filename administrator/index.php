@@ -46,7 +46,7 @@ if(isset($_GET["ajaxRequest"]) && $_GET["ajaxRequest"] == 1){ // TODO: Add more 
 	}
 } else {
 	// Handle template
-	if($Render->loadTemplateFile($Config->getVar('administratorTemplate'), Define::get('adminTemplate')) == true){
+	if($Render->loadTemplateFile($Config->getSystemVar('administratorTemplate'), Define::get('adminTemplate')) == true){
 		// Template loaded successfully
 		
 		// Parse the template file

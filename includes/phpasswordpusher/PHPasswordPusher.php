@@ -296,8 +296,8 @@ class PHPasswordPusher {
 		
 		$params = array('id'        => $id,
 						'seccred'   => $encrypted,
-						'xtime'     => "+" . (is_numeric($expirationTime) ? $expirationTime : $Config->getVar("expirationTimeDefault")) . " minutes",
-						'xviews'    => (is_numeric($expirationViews) ? $expirationViews : $Config->getVar("expirationViewsDefault"))
+						'xtime'     => "+" . (is_numeric($expirationTime) ? $expirationTime : $Config->getSystemVar("expirationTimeDefault")) . " minutes",
+						'xviews'    => (is_numeric($expirationViews) ? $expirationViews : $Config->getSystemVar("expirationViewsDefault"))
 						);
 		
 		$result = $db->insert($query, $params);
@@ -327,7 +327,7 @@ class PHPasswordPusher {
 		if(isset($inputData) && $inputData !== ""){
 			
 			$uniqueId = PHPasswordPusher::getUniqueId();
-			if(PHPasswordPusher::insertCredential($uniqueId, $inputData, $Config->getVar('expirationTimeDefault'), $Config->getVar('expirationViewsDefault')) == true){
+			if(PHPasswordPusher::insertCredential($uniqueId, $inputData, $Config->getSystemVar('expirationTimeDefault'), $Config->getSystemVar('expirationViewsDefault')) == true){
 				return $uniqueId;
 			}
 		}

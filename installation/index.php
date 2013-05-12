@@ -73,7 +73,7 @@ ImportClass("Menu.MenuGenerator");
 $Render = new Render();
 
 // Handle template
-if($Render->loadTemplateFile($Config->getVar('administratorTemplate'), Define::get('adminTemplate')) == true){
+if($Render->loadTemplateFile($Config->getSystemVar('administratorTemplate'), Define::get('adminTemplate')) == true){
 	// Template loaded successfully
 	
 	// Parse the template file

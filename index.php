@@ -20,7 +20,7 @@ require_once(BASEPATH.INCLUDES . '/system/System.php');
 $Render = new Render();
 
 // Handle template
-if($Render->loadTemplateFile($Config->getVar('userTemplate'), Define::get('userTemplate')) == true){
+if($Render->loadTemplateFile($Config->getSystemVar('userTemplate'), Define::get('userTemplate')) == true){
 	// Template loaded successfully
 	
 	// Parse the template file

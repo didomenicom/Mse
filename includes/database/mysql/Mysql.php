@@ -22,10 +22,10 @@ class Mysql {
 		global $Config;
 		
 		/* Connection Informaion */
-		$db_host      = $Config->getVar('database_Host');
-		$db_user      = $Config->getVar('database_User');
-		$db_name      = $Config->getVar('database_Name');
-		$db_pass      = $Config->getVar('database_Pass');
+		$db_host      = $Config->getSystemVar('database_Host');
+		$db_user      = $Config->getSystemVar('database_User');
+		$db_name      = $Config->getSystemVar('database_Name');
+		$db_pass      = $Config->getSystemVar('database_Pass');
 		
 		/* Connect to MySQL */
 		$this->dbPointer = new PDO('mysql:dbname=' . $db_name . '; host=' . $db_host, $db_user, $db_pass) or die("Failed to connect to mysql server");

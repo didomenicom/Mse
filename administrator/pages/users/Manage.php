@@ -22,7 +22,7 @@ function Manage(){
 		<div class="btn-toolbar pull-right" style="margin-top: 0px;">
 			<div class="btn-group">
 				<a class="btn" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=add"><i class="icon-plus"></i></a>
-				<a class="btn" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=config&act=manage&com=users"><i class="icon-wrench"></i></a>
+				<a class="btn" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=config&act=edit&com=users"><i class="icon-wrench"></i></a>
 				<a class="btn" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=help&act=manage&com=users"><i class="icon-question-sign"></i></a>
 				<a class="btn dropdown-toggle dropdown" data-toggle="dropdown" href="#" style="padding-left:14px; padding-right:14px;"><i class="icon-eye-open"></i></a>
 				<ul class="dropdown-menu">

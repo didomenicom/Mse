@@ -12,6 +12,7 @@ defined("Access") or die("Direct Access Not Allowed");
  */ 
 class Config {
 	private $configRead = false;
+	private $configWrite = false;
 	private $configArray = array();
 	
 	/** 
@@ -62,11 +63,10 @@ class Config {
 	}
 	
 	/** 
-	 * Gets the value of a variable name
+	 * Gets the value of a variable name from the config file
 	 * Returns the value or false
-	 * TODO: Change return to NULL and report error when unknown name
 	 */ 
-	public function getVar($name){
+	public function getSystemVar($name){
 		if(isset($name) && $name !== ""){
 			if($this->configRead == true){
 				if(array_key_exists($name, $this->configArray)){
@@ -75,20 +75,107 @@ class Config {
 			}
 		}
 		
-		return false;
+		return NULL;
 	}
 	
 	/** 
-	 * Sets the value for a variable name
+	 * Sets the value for a variable name from the config file
 	 * Returns true if write is successful, false otherwise
 	 */ 
-	public function setVar($name, $value){
+	public function setSystemVar($name, $value){
 		if(isset($name) && $name !== ""){
 			if($this->configRead == true){
 				if(array_key_exists($name, $this->configArray)){
 					$this->configArray[$name] = $value;
+					$this->configWrite = true;
 					return true;
 				}
+			}
+		}
+		
+		return false;
+	}
+	
+	
+	/** 
+	 * Gets the value of a variable name from the database
+	 * Returns the value or false
+	 * TODO: Add ConfigOption Class?
+	 */ 
+	public function getVar($component, $name){
+		global $db;
+		
+		if(isset($component) && isset($name) && $component !== "" && $name !== ""){
+			// Search for the name and $component
+			$record = $db->fetchAssoc("SELECT * FROM config WHERE component='" . $component . "' AND name='" . $name . "'");
+			
+			if(isset($record->id)){
+				// Found it
+				return $record->value;
+			}
+		}
+		
+		return NULL;
+	}
+	
+	/** 
+	 * Sets the value for a variable name from the database
+	 * Returns true if write is successful, false otherwise
+	 */ 
+	public function setVar($component, $name, $value){
+		global $db;
+		
+		if(isset($name) && $name !== ""){
+			if(self::varExists($component, $name) == true){
+				// The record exists
+				$result = $db->update("UPDATE config SET " .
+						"value='" . addslashes(self::getValue()) . "' " .
+						"WHERE component='" . $component . "' AND name='" . $name . "'");
+				
+				return $result;
+			}
+		}
+		
+		return false;
+	}
+	
+	/** 
+	 * Create a new record in the database
+	 * Returns true if write is successful, false otherwise
+	 * TODO: Check if the component name is valid
+	 */ 
+	public function addVar($component, $type, $name, $value){
+		global $db;
+		
+		if(isset($component) && isset($type) && isset($name) && $component !== "" && $type !== "" && $name !== ""){
+			if(self::varExists($component, $name) == false){
+				// Nothing in the DB exists
+				$result = $db->insert("INSERT INTO config (component, type, name, value) VALUES (" .
+						"'" . addslashes($component) . "', " .
+						"'" . addslashes($type) . "', " .
+						"'" . addslashes($name) . "', " .
+						"'" . addslashes($value) . "')");
+				
+				return $result;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Checks if a key exists in the config database
+	 * Returns true if it exists, false otherwise
+	 */
+	private function varExists($component, $name){
+		global $db;
+		if(isset($component) && isset($name) && $component !== "" && $name !== ""){
+			// Search for the name and key
+			$record = $db->fetchAssoc("SELECT * FROM config WHERE component='" . $component . "' AND name='" . $name . "'");
+			
+			if(isset($record->id)){
+				// Found it
+				return true;
 			}
 		}
 		
@@ -102,9 +189,9 @@ class Config {
 	 * TODO: Set flag when a write is done and dont write back if not set
 	 */ 
 	public function __destruct(){
-		// Save everything back to file
-		// TODO: Save
-//		print "Destroying \n";
+		if($this->configWrite == true){
+			// Writeback required
+		}
    }
 }
 

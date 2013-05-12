@@ -23,16 +23,16 @@ class Mailer extends PHPMailer {
 		parent::IsHTML(true);
 		
 		// Determine type of sending
-		switch($Config->getVar("email_Type")){
+		switch($Config->getSystemVar("email_Type")){
 			case "SMTP":
 				parent::IsSMTP();
-				$this->Host				= $Config->getVar("email_SMTPHost");
-				$this->Port				= $Config->getVar("email_SMTPPort");
-				$this->SMTPAuth			= $Config->getVar("email_SMTPAuthentication");		// Enable SMTP authentication
-				$this->SMTPKeepAlive	= $Config->getVar("email_SMTPKeepAlive");			// SMTP connection will not close after each email sent
-				$this->Username			= $Config->getVar("email_SMTPUsername");
-				$this->Password 		= $Config->getVar("email_SMTPPassword");
-				$this->SMTPSecure 		= $Config->getVar("email_SMTPSecure");
+				$this->Host				= $Config->getSystemVar("email_SMTPHost");
+				$this->Port				= $Config->getSystemVar("email_SMTPPort");
+				$this->SMTPAuth			= $Config->getSystemVar("email_SMTPAuthentication");		// Enable SMTP authentication
+				$this->SMTPKeepAlive	= $Config->getSystemVar("email_SMTPKeepAlive");			// SMTP connection will not close after each email sent
+				$this->Username			= $Config->getSystemVar("email_SMTPUsername");
+				$this->Password 		= $Config->getSystemVar("email_SMTPPassword");
+				$this->SMTPSecure 		= $Config->getSystemVar("email_SMTPSecure");
 				break;
 			case "mail":
 				parent::IsMail();
@@ -46,8 +46,8 @@ class Mailer extends PHPMailer {
 		}
 		
 		// Add the sender information
-		parent::SetFrom($Config->getVar("email_FromEmail"), $Config->getVar("email_FromName"));
-		parent::AddReplyTo($Config->getVar("email_ReplyToEmail"), $Config->getVar("email_ReplyToName"));
+		parent::SetFrom($Config->getSystemVar("email_FromEmail"), $Config->getSystemVar("email_FromName"));
+		parent::AddReplyTo($Config->getSystemVar("email_ReplyToEmail"), $Config->getSystemVar("email_ReplyToName"));
 			
 		Log::info("Mailer Configured");
 	}

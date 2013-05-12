@@ -123,7 +123,7 @@ class UserSession {
 			if($this->duration == false){
 				// Short
 				$timestamp = Date::getCurrentTimeStamp();
-				$timestamp += ($Config->getVar('sessionDuriation') * 60); // sessionDuriation is in minutes
+				$timestamp += ($Config->getSystemVar('sessionDuriation') * 60); // sessionDuriation is in minutes
 				
 				return Date::getDbDateTimeFormat($timestamp);
 			} else {

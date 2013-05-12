@@ -9,12 +9,15 @@ defined("Access") or die("Direct Access Not Allowed");
 
 class ConfigTypes {
 	private static $records = array(
-				"Unknown", 
-				"Integer", 
-				"Double",
-				"Array", 
-				"Text", 
-				"Date");
+				"Unknown",  // 0
+				"Integer",  // 1
+				"Double",   // 2
+				"Array",    // 3
+				"TextBox",  // 4
+				"TextArea", // 5
+				"Date",     // 6
+				"Option");    // 7
+	// TODO: Add an option dropdown type (need to somehow define what those options are)
 	
 	private static $recordIndex = 1;
 

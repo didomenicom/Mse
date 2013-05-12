@@ -117,7 +117,7 @@ class UserActions {
 							$userSession->save();
 							
 							// Create the cookie
-							Cookie::add($Config->getVar('cookieName'), $userSession->getSessionId());
+							Cookie::add($Config->getSystemVar('cookieName'), $userSession->getSessionId());
 							
 							// Set the last login
 							$user->setLastLogin(Date::getDbDateTimeFormat());
@@ -152,7 +152,7 @@ class UserActions {
 			ImportClass("User.UserSession");
 			
 			// Find the cookie
-			$sessionId = Cookie::get($Config->getVar('cookieName'));
+			$sessionId = Cookie::get($Config->getSystemVar('cookieName'));
 			
 			// Get the session
 			$userSession = new UserSession($sessionId);
@@ -160,7 +160,7 @@ class UserActions {
 			// Destroy the session
 			if($userSession->destroy() == true){
 				// Destroy the cookie
-				Cookie::delete($Config->getVar('cookieName'));
+				Cookie::delete($Config->getSystemVar('cookieName'));
 				
 				// Success
 				Messages::setMessage("You have been logged out", Define::get("MessageLevelSuccess"));
