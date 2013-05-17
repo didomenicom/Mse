@@ -58,10 +58,12 @@ class Group extends Library {
 	}
 	
 	public function getName($text = 0){
-		if($text == 1){
-			return stripslashes($this->recordInfo['name']);
-		} else {
-			return $this->recordInfo['name'];
+		if(isset($this->recordInfo['name'])){
+			if($text == 1){
+				return stripslashes($this->recordInfo['name']);
+			} else {
+				return $this->recordInfo['name'];
+			}
 		}
 	}
 	
