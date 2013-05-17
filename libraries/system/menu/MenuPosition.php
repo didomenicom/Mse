@@ -153,7 +153,7 @@ class MenuPosition extends Library {
 		if($this->recordInfo['id'] > 0){
 			$result = $db->update("UPDATE menu_position SET " . 
 				"name='" . addslashes(self::getName()) . "', " . 
-				"parent='" . addslashes(self::getParent()) . "', " . 
+				"position='" . addslashes(self::getPosition()) . "', " . 
 				"backend='" . addslashes(self::getBackend()) . "', " . 
 				"inline='" . addslashes(self::getInline()) . "' " . 
 				"WHERE id=" . addslashes(self::getId()));
