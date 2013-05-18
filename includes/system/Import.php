@@ -44,12 +44,12 @@ class Importer {
 						return true;
 					} else {
 						// File doesn't exist
-						Log::error("Importer: add -- file not found - filename = '" . $path . "' class = '" . $className . "'");
+						Log::fatal("Importer: add -- file not found - filename = '" . $path . "' class = '" . $className . "'");
 					}
 				}
 			}
 		} else {
-			Log::error("Importer: add -- class name not defined");
+			Log::fatal("Importer: add -- class name not defined");
 		}
 		
 		return false;
@@ -74,7 +74,7 @@ class Importer {
 				Log::fatal("Importer: addFile -- import failed - path = '" . $path . "'");
 			}
 		} else {
-			Log::error("Importer: addFile -- name not defined");
+			Log::fatal("Importer: addFile -- name not defined");
 		}
 		
 		return false;
