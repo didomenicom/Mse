@@ -17,7 +17,7 @@ class Importer {
 	 * Adds a new class to the system
 	 */
 	public static function addClass($class){
-		if(isset($class) && substr($class) > 0){
+		if(isset($class) && strlen($class) > 0){
 			// Parse it
 			$classParts = explode(".", $class);
 			$className = ucfirst(array_pop($classParts));
@@ -49,7 +49,7 @@ class Importer {
 				}
 			}
 		} else {
-			Log::fatal("Importer: add -- class name not defined");
+			Log::fatal("Importer: add -- class name not defined = '" . $class . "'");
 		}
 		
 		return false;
@@ -59,7 +59,7 @@ class Importer {
 	 * Adds a new file to the system
 	 */
 	public static function addFile($name, $fullPath = false){
-		if(isset($name) && $name != ""){
+		if(isset($name) && strlen($name) > 0){
 			if($fullPath == false){
 				// Build path
 				$path = BASEPATH . "/" . implode("/", explode(".", $name)) . ".php";
@@ -74,7 +74,7 @@ class Importer {
 				Log::fatal("Importer: addFile -- import failed - path = '" . $path . "'");
 			}
 		} else {
-			Log::fatal("Importer: addFile -- name not defined");
+			Log::fatal("Importer: addFile -- name not defined = '" . $name . "'");
 		}
 		
 		return false;
