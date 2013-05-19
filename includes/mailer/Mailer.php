@@ -7,7 +7,7 @@
  */
 defined("Access") or die("Direct Access Not Allowed");
 
-ImportFile(Url::getDirBase() . "/libraries/system/mailer/class.phpmailer.php");
+ImportFile("includes/mailer/class.phpmailer.php");
 
 class Mailer extends PHPMailer {
 	private $toAddress = array();
