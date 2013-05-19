@@ -29,14 +29,14 @@ class Importer {
 				// File was in includes
 				return true;
 			} else {
-				Log::info("Importer: add -- file not found in includes - filename = '" . $path . "' class = '" . $className . "'");
+				Log::info("Importer: addClass -- file not found in includes - filename = '" . $path . "' class = '" . $className . "'");
 				
 				// Check if file is a system file in libraries/system
 				if(self::importFile(BASEPATH.LIBRARY.SYSTEM . "/" . $path) == true){
 					// File was in libraries/system
 					return true;
 				} else {
-					Log::info("Importer: add -- file not found in libraries/system - filename = '" . $path . "' class = '" . $className . "'");
+					Log::info("Importer: addClass -- file not found in libraries/system - filename = '" . $path . "' class = '" . $className . "'");
 					
 					// Check if file is a system file in libraries/user
 					if(self::importFile(BASEPATH.LIBRARY.USER . "/" . $path) == true){
@@ -44,12 +44,12 @@ class Importer {
 						return true;
 					} else {
 						// File doesn't exist
-						Log::fatal("Importer: add -- file not found - filename = '" . $path . "' class = '" . $className . "'");
+						Log::fatal("Importer: addClass -- file not found - filename = '" . $path . "' class = '" . $className . "'");
 					}
 				}
 			}
 		} else {
-			Log::fatal("Importer: add -- class name not defined = '" . $class . "'");
+			Log::fatal("Importer: addClass -- class name not defined = '" . $class . "'");
 		}
 		
 		return false;
@@ -58,20 +58,31 @@ class Importer {
 	/** 
 	 * Adds a new file to the system
 	 */
-	public static function addFile($name, $fullPath = false){
+	public static function addFile($name){
 		if(isset($name) && strlen($name) > 0){
-			if($fullPath == false){
-				// Build path
-				$path = BASEPATH . "/" . implode("/", explode(".", $name)) . ".php";
+			// Build path
+			if(substr_count($name, ".") > 1){
+				$nameParts = explode(".", $name);
+				
+				if(substr($name, (strlen($name) - 4), 4) === ".php"){
+					array_pop($nameParts);
+				}
+				
+				$fileName = array_pop($nameParts);
+				$namePath = strtolower(implode("/", $nameParts));
+				
+				$path =  $namePath . (substr($namePath, (strlen($namePath) - 1), 1) === "/" ? "" : "/") . $fileName . ".php";
 			} else {
 				$path = $name;
 			}
+			
+			$path = (substr($path, 0, strlen(BASEPATH)) === BASEPATH ? "" : BASEPATH . "/") . $path;
 			
 			if(self::importFile($path) == true){
 				return true;
 			} else {
 				// File doesn't exist
-				Log::fatal("Importer: addFile -- import failed - path = '" . $path . "'");
+				Log::fatal("Importer: addFile -- import failed - path = '" . $fileName . "'");
 			}
 		} else {
 			Log::fatal("Importer: addFile -- name not defined = '" . $name . "'");
@@ -136,7 +147,7 @@ function ImportClass($name){
  * Import a file
  */
 function ImportFile($name){
-	return Importer::addFile($name, true);
+	return Importer::addFile($name);
 }
 
 ?>
