@@ -380,7 +380,7 @@ class PHPasswordPusher {
 			
 			$result = $db->delete($query, $params);
 			
-			if($sresult == 1){
+			if($result == 1){
 				return true;
 			}
 		}
