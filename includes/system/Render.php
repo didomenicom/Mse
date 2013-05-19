@@ -182,9 +182,20 @@ class Render {
 		Define::add("templateSettings_" . $variable, $value);
 	}
 	
+	/**
+	 * This will clear all of the output EXCEPT for the code that this was called from. 
+	 */
 	public function clearOutput(){
 		$this->clearBufferFlag = true;
 		$this->clearBufferLocation = $this->templateFileTagIndex;
+	}
+	
+	/**
+	 * This will restore the clearOutput function.
+	 */
+	public function restoreOutput(){
+		$this->clearBufferFlag = false;
+		$this->clearBufferLocation = NULL;
 	}
 }
 
