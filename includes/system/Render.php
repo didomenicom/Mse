@@ -14,7 +14,12 @@ defined("Access") or die("Direct Access Not Allowed");
  */
 class Render {
 	private $template_fileName = "";
-	private $outputBuffer = "";
+	private $outputBuffer = NULL;
+	private $templateFileTagMatches = NULL;
+	private $templateFileTagResults = NULL;
+	private $templateFileTagIndex = NULL;
+	private $clearBufferFlag = false;
+	private $clearBufferLocation = NULL;
 	
 	/**
 	 * Constructor class for a new renderer. This class is not setup statically
@@ -54,6 +59,7 @@ class Render {
 			
 			// Build the file
 			ob_start();
+			
 			$result = ImportFile($filename);
 			$this->outputBuffer = ob_get_contents();
 			ob_end_clean();
@@ -67,27 +73,26 @@ class Render {
 	}
 	
 	/**
-	 * Parses a template file and looks for all of the mse tags. If a tag is found it will render it.
+	 * Parses a template file and look for all of the mse tags. If a tag is found it will render it.
 	 */
 	public function parseTemplateFile(){
-		$replace = array();
-		$matches = array();
+		$this->templateFileTagResults = array();
+		$this->templateFileTagMatches = array();
 		
-		if(preg_match_all('#<mse:include\ type="([^"]+)" (.*)\/>#iU', $this->outputBuffer, $matches)){
+		if(preg_match_all('#<mse:include\ type="([^"]+)" (.*)\/>#iU', $this->outputBuffer, $this->templateFileTagMatches)){
 			// Parse it from bottom up
-			$matches[0] = array_reverse($matches[0]);
-			$matches[1] = array_reverse($matches[1]);
-			$matches[2] = array_reverse($matches[2]);
+			$this->templateFileTagMatches[0] = array_reverse($this->templateFileTagMatches[0]);
+			$this->templateFileTagMatches[1] = array_reverse($this->templateFileTagMatches[1]);
+			$this->templateFileTagMatches[2] = array_reverse($this->templateFileTagMatches[2]);
 			
-			for($i = 0; $i < count($matches[1]); $i++){
-				$attribs = $this->parseAttributes($matches[2][$i]);
-				$type = $matches[1][$i];
+			for($i = 0; ($i < count($this->templateFileTagMatches[1]) && $this->clearBufferFlag == false); $i++){
+				$this->templateFileTagIndex = $i;
+				$attribs = $this->parseAttributes($this->templateFileTagMatches[2][$i]);
+				$type = $this->templateFileTagMatches[1][$i];
 	
 				$name = isset($attribs['name']) ? $attribs['name'] : NULL;
-				$replace[$i] = $this->bufferComponent($type, $name, $attribs);
+				$this->templateFileTagResults[$i] = $this->bufferComponent($type, $name, $attribs);
 			}
-			
-			$this->outputBuffer = str_replace($matches[0], $replace, $this->outputBuffer);
 		}
 		
 		return true;
@@ -162,6 +167,11 @@ class Render {
 	 * Returns all of the rendered code that has been stored in the buffer
 	 */
 	public function renderPage(){
+		if($this->clearBufferFlag == true){
+			$this->outputBuffer = $this->templateFileTagResults[$this->clearBufferLocation];
+		} else {
+			$this->outputBuffer = str_replace($this->templateFileTagMatches[0], $this->templateFileTagResults, $this->outputBuffer);
+		}
 		return $this->outputBuffer;
 	}
 	
@@ -170,6 +180,11 @@ class Render {
 	 */
 	public function templateSetting($variable, $value){
 		Define::add("templateSettings_" . $variable, $value);
+	}
+	
+	public function clearOutput(){
+		$this->clearBufferFlag = true;
+		$this->clearBufferLocation = $this->templateFileTagIndex;
 	}
 }
 
