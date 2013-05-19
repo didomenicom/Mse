@@ -61,7 +61,9 @@ class Importer {
 	public static function addFile($name){
 		if(isset($name) && strlen($name) > 0){
 			// Build path
-			if(substr_count($name, ".") > 1){
+			if(substr_count($name, "/") > 1){
+				$path = $name;
+			} else {
 				$nameParts = explode(".", $name);
 				
 				if(substr($name, (strlen($name) - 4), 4) === ".php"){
@@ -72,8 +74,6 @@ class Importer {
 				$namePath = strtolower(implode("/", $nameParts));
 				
 				$path =  $namePath . (substr($namePath, (strlen($namePath) - 1), 1) === "/" ? "" : "/") . $fileName . ".php";
-			} else {
-				$path = $name;
 			}
 			
 			$path = (substr($path, 0, strlen(BASEPATH)) === BASEPATH ? "" : BASEPATH . "/") . $path;
@@ -82,7 +82,7 @@ class Importer {
 				return true;
 			} else {
 				// File doesn't exist
-				Log::fatal("Importer: addFile -- import failed - path = '" . $fileName . "'");
+				Log::fatal("Importer: addFile -- import failed - path = '" . $name . "'");
 			}
 		} else {
 			Log::fatal("Importer: addFile -- name not defined = '" . $name . "'");
