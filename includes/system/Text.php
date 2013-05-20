@@ -35,21 +35,87 @@ class Text {
 	 * Verifies if a date is in a valid format of something similar to YYYYMMDD
 	 */
 	public static function verifyDbDateFormat($inputText){
-		return (preg_match("/^(19|20)?[0-9]{2})[- \/.]((0?[1-9]|1[012])[- \/.](0?[1-9]|[12][0-9]|3[01])*$/", $inputText) == 1 ? true : false);
+		return (preg_match("/^([0-9]{4})(0?[1-9]|1[012])(0?[1-9]|[12][0-9]|3[01])*$/", $inputText) == 1 ? true : false);
 	}
+	
+	/**
+	 * Verifies if an email address is in a valid format similar to email@domain.com
+	 */
+	public static function verifyEmailAddressFormat($inputText){
+		return (preg_match("/^[a-zA-Z0-9._%-+]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/", $inputText) == 1 ? true : false);
+	}
+	
+	/**
+	 * Verifies if an input is a integer
+	 */
+	public static function verifyIntegerFormat($inputText){
+		return (preg_match("/^[0-9]+$/", $inputText) == 1 ? true : false);
+	}
+	
+	/**
+	 * Verifies if a phone number is in a valid format similar to (123) 456-7890
+	 */
+	public static function verifyPhoneNumberFormat($inputText){
+		return (preg_match("/^(([0-9]{1})*[- .(]*([0-9]{3})[- .)]*[0-9]{3}[- .]*[0-9]{4})+$/", $inputText) == 1 ? true : false);
+	}
+	
+	
+	
+	/**
+	 * Converts an input date in the format of MM/DD/YYYY into a database format of YYYYMMDD
+	 */
+	public static function convertStandardDateToDbDateFormat($inputText){
+		// Check if the input is in standard format
+		if(Text::verifyStandardDateFormat($inputText) == true){
+			$inputText = preg_replace_callback('/((0?[1-9]|1[012])[- \/.](0?[1-9]|[12][0-9]|3[01])[- \/.]((19|20)?[0-9]{2}))/', 
+								function($matches){
+									return (strlen($matches[4]) == 2 ? "20" : "") . $matches[4] . (strlen($matches[2]) == 1 ? "0" : "") . $matches[2] . (strlen($matches[3]) == 1 ? "0" : "") . $matches[3]; 
+								}, 
+							$inputText);
+			return $inputText;
+		}
+		
+		return "";
+	}
+	
+	/**
+	 * Converts an input date in the format of YYYYMMDD into a database format of MM/DD/YYYY
+	 */
+	public static function convertDbDateToStandardDateFormat($inputText){
+		// Check if the input is in standard format
+		if(Text::verifyDbDateFormat($inputText) == true){
+			return substr($inputText, 4, 2) . "/" . substr($inputText, 6, 2) . "/" . substr($inputText, 0, 4);
+		}
+	
+		return "";
+	}
+	
+	
+	
 	
 	/** 
 	 * This function will handle all of the sorting for table headers. 
+	 * TODO: REMOVE/Cleanup
 	 */
-	public static function sortHeader($displayName, $sorterCall, $sortBy){
-		if(isset($displayName) && isset($sorterCall) && $displayName !== "" && $sorterCall !== ""){
-			return $displayName . ($sortBy == true ? "*" : "");
+	public static function sortHeader($displayName, $sorterCall, $sort = array()){
+		if(isset($displayName) && isset($sorterCall) && strlen($displayName) > 0 && strlen($sorterCall) > 0){
+			if(isset($sort['by']) && isset($sort['direction'])){
+				if(strtoupper($sort['direction']) === "ASC" || strtoupper($sort['direction']) === "DESC"){
+					return $displayName . ($sort['by'] === $sorterCall ? (strtoupper($sort['direction']) === "ASC" ? " <i class=\"icon-arrow-down\"></i>" : " <i class=\"icon-arrow-up\"></i>") : "");
+				}
+			}
+			
+			return $displayName;
 		}
 	}
 	
-	
-	
-	
+	/**
+	 * TODO: REMOVE
+	 * @param unknown_type $ordering
+	 * @param unknown_type $id
+	 * @param unknown_type $name
+	 * @param unknown_type $default
+	 */
 	public static function ordering($ordering, $id, $name, $default = 0){
 		global $Render;
 		
@@ -67,7 +133,13 @@ class Text {
 	}
 	
 	
-	
+	/**
+	 * TODO: REMOVE
+	 * @param unknown_type $filter
+	 * @param unknown_type $name
+	 * @param unknown_type $options
+	 * @param unknown_type $all
+	 */
 	public static function filters($filter, $name, $options, $all = 1){
 		global $Render;
 		
@@ -89,7 +161,11 @@ class Text {
 
 	}
 
-
+	/**
+	 * TODO: REMOVE
+	 * @param unknown_type $pageLength
+	 * @param unknown_type $options
+	 */
 	public static function displayCount($pageLength, $options = array(10, 25, 50, 100)){
 		global $Render;
 		
@@ -106,6 +182,11 @@ class Text {
 		$Render->addContent("</select>");
 	}
 	
+	/**
+	 * TODO: REMOVE
+	 * @param unknown_type $pageLength
+	 * @param unknown_type $rowsCount
+	 */
 	public static function displayPageNumber($pageLength, $rowsCount){
 		global $Render;
 		
