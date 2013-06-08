@@ -11,7 +11,6 @@ ImportClass("Render.ComponentRender");
 
 // TODO: Cleanup (Define::get('baseSystem') == 1 ? Url::getAdminDirBase() : Url::getDirBase()) as variable
 class ComponentRenderComponent extends ComponentRender {
-	
 	public function render($name, $attributes, $result){ // TODO: Handle method scope
 		global $config;
 		
@@ -23,13 +22,15 @@ class ComponentRenderComponent extends ComponentRender {
 			$name = strtolower($name);
 			
 			// Build array of available components
-			// Components are listed in pages
-			$components = File::directoryContents((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")));
+			// Components are listed in pages/user and pages/system
 			
-			// Loop through each
+			// Look through user
+			$components = File::directoryContents((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . "/user");
+			
+			// Loop through each user
 			foreach($components as $component){
 				$origComponent = $component;
-				if(!is_dir((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . $component)){
+				if(!is_dir((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . "user/" . $component)){
 					// Check for file extension
 					if(substr_count($component, '.') > 0){
 						// Remove . and extension -- assuming anything after last . is exension
@@ -53,7 +54,45 @@ class ComponentRenderComponent extends ComponentRender {
 						
 						// Build the file
 						ob_start();
-						$result = ImportFile((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . $origComponent);
+						$result = ImportFile((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . "user/" . $origComponent);
+						$name($attributes);
+						$content = ob_get_contents();
+						ob_end_clean();
+					}
+				}
+			}
+			
+			// Look through system
+			$components = File::directoryContents((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . "/system");
+			
+			// Loop through each system
+			foreach($components as $component){
+				$origComponent = $component;
+				if(!is_dir((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . "system/" . $component)){
+					// Check for file extension
+					if(substr_count($component, '.') > 0){
+						// Remove . and extension -- assuming anything after last . is exension
+						$parts = explode(".", $component);
+						array_pop($parts);
+						$component = implode(".", $parts);
+					}
+					
+					// put it to lowercase 
+					$component = strtolower($component);
+					
+					// Check if it is the one we are looking for
+					if($name === $component){
+						// Remove name from attributes list
+						if(isset($attributes['name'])){
+							unset($attributes['name']);
+						}
+						
+						// Build the class name
+						$name = ucfirst($name);
+						
+						// Build the file
+						ob_start();
+						$result = ImportFile((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . "system/" . $origComponent);
 						$name($attributes);
 						$content = ob_get_contents();
 						ob_end_clean();
