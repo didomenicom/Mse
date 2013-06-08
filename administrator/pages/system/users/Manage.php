@@ -31,11 +31,17 @@ function Manage(){
 			</div>
 		</div>
 		<?php
-		
-		// Create the class
+		// Setup the filters
 		$filter['deleted'] = $viewDeleted;
 		$filter['permissionGroup'] = (Session::get('filter_userPermissionGroup') != NULL ? Session::get('filter_userPermissionGroup') : NULL);
-		$items = new Users($filter);
+		
+		$userSortBy = UserFunctions::getLoggedIn()->getSetting("sort.by.users"); 
+		$userSortDirection = UserFunctions::getLoggedIn()->getSetting("sort.direction.users");
+		$sort['by'] = ($userSortBy != NULL ? $userSortBy : "name");
+		$sort['direction'] = ($userSortDirection != NULL ? $userSortDirection : "ASC");
+		
+		// Create the class
+		$items = new Users($filter, $sort);
 		
 		// TODO: Add to header (render class function)
 		?>
@@ -84,7 +90,31 @@ function Manage(){
 				}
 			});
 			
-		    function updateRows(data){
+			$(".sort").click(function(e){
+				var str = $(this).attr("id");
+				
+				if(str !== ""){
+					$.ajax({
+						type: "POST",
+						url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
+						async: true,
+						timeout: 50000,
+						data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "sort", val: str},
+						success: function(data){
+							if(data == 1){
+								// Save off search query 
+								var userSearch = $("#filter_userSearch").val();
+								var userPermissionGroup = $("#filter_userPermissionGroup").find("option:selected").val();
+								window.location.replace("<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=manage" + ((userSearch != 0 || userSearch != "") ? "&q=" + userSearch : "") + (userPermissionGroup != 0 ? "&f=" + userPermissionGroup : ""));
+							} else {
+								// TODO: Add error message 
+							}
+						}
+					});
+				}
+			});
+			
+			function updateRows(data){
 				if(data == 0){
 					$("#manageTable tbody").html("");
 				}
@@ -110,7 +140,7 @@ function Manage(){
 						<th colspan="7">
 							<div class="input-prepend pull-left dropdown">
 								<span class="add-on"><i class="icon-search"></i> Search </span>
-								<input type="text" name="filter_userSearch" id="filter_userSearch" autocomplete="off">
+								<input type="text" name="filter_userSearch" id="filter_userSearch" autocomplete="off" value="<?php echo (isset($_GET["q"]) ? $_GET["q"] : ""); ?>">
 							</div>
 							<div class="pull-right">
 								<select name="filter_userPermissionGroup" id="filter_userPermissionGroup">
@@ -137,22 +167,22 @@ function Manage(){
 							
 						</th>
 						<th width="18%">
-							<?php echo Text::sortHeader("Name", "name", true); ?>
+							<a href="#" id="sort_name" class="sort"><?php echo Text::sortHeader("Name", "name", $sort); ?></a>
 						</th>
 						<th width="18%">
-							<?php echo Text::sortHeader("Username", "username", false); ?>
+							<a href="#" id="sort_username" class="sort"><?php echo Text::sortHeader("Username", "username", $sort); ?></a>
 						</th>
 						<th width="18%">
-							<?php echo Text::sortHeader("Email Address", "email", false); ?>
+							<a href="#" id="sort_email" class="sort"><?php echo Text::sortHeader("Email Address", "email", $sort); ?></a>
 						</th>
 						<th width="18%">
-							<?php echo Text::sortHeader("Permission Group", "permissionGroup", false); ?>
+							<a href="#" id="sort_permissionGroup" class="sort"><?php echo Text::sortHeader("Permission Group", "permissionGroup", $sort); ?></a>
 						</th>
 						<th width="18%">
-							<?php echo Text::sortHeader("Last Login", "lastLogin", false); ?>
+							<a href="#" id="sort_lastLogin" class="sort"><?php echo Text::sortHeader("Last Login", "lastLogin", $sort); ?></a>
 						</th>
 						<th width="5%">
-							<?php echo Text::sortHeader("ID", "id", false); ?>
+							<a href="#" id="sort_id" class="sort"><?php echo Text::sortHeader("ID", "id", $sort); ?></a>
 						</th>
 					</tr>
 				</thead>
