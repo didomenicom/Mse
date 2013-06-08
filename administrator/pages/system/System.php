@@ -9,7 +9,7 @@ defined("Access") or die("Direct Access Not Allowed");
 
 switch(Url::getParts('act')){
 	case 'info':
-		ImportFile(Url::getAdminDirBase() . DS . "pages/system/info.php");
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/system/info.php");
 		info();
 		break;
 	

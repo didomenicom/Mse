@@ -9,17 +9,17 @@ defined("Access") or die("Direct Access Not Allowed");
 
 switch(Url::getParts('act')){
 	case 'tasks':
-		ImportFile(Url::getAdminDirBase() . DS . "pages/development/Tasks.php");
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/Tasks.php");
 		Tasks();
 		break;
 	
 	case 'ajaxHandler':
-		ImportFile(Url::getAdminDirBase() . DS . "pages/development/AjaxHandler.php");
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/AjaxHandler.php");
 		Tasks();
 		break;
 	
 	case 'configGenerator':
-		ImportFile(Url::getAdminDirBase() . DS . "pages/development/ConfigGenerator.php");
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/ConfigGenerator.php");
 		Tasks();
 		break;
 	

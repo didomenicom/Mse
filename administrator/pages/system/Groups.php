@@ -9,18 +9,18 @@ defined("Access") or die("Direct Access Not Allowed");
 
 switch(Url::getParts('act')){
 	case 'manage':
-		ImportFile(Url::getAdminDirBase() . DS . "pages/groups/Manage.php");
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/groups/Manage.php");
 		Manage();
 		break;
 		
 	case 'add':
 	case 'edit':
-		ImportFile(Url::getAdminDirBase() . DS . "pages/groups/Edit.php");
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/groups/Edit.php");
 		Edit();
 		break;
 		
 	case 'delete':
-		ImportFile(Url::getAdminDirBase() . DS . "pages/groups/Delete.php");
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/groups/Delete.php");
 		Delete();
 		break;
 	

@@ -9,7 +9,7 @@ defined("Access") or die("Direct Access Not Allowed");
 
 switch(Url::getParts('act')){
 	default:
-		ImportFile(Url::getAdminDirBase() . DS . "pages/help/View.php");
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/help/View.php");
 		View();
 		break;
 }

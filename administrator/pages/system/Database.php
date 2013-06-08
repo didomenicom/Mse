@@ -9,7 +9,7 @@ defined("Access") or die("Direct Access Not Allowed");
 
 switch(Url::getParts('act')){
 	case 'event':
-		ImportFile(Url::getAdminDirBase() . DS . "pages/database/event.php");
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/database/event.php");
 		event();
 		break;
 	
