@@ -12,8 +12,6 @@ class Db {
 	
 	private $queryArray = array(); // Log
 	
-	private $lastInsertId;
-	
 	public function Db(){
 		global $Config;
 		
@@ -77,7 +75,7 @@ class Db {
 				// Log query
 				self::logQuery($query);
 				
-				return $this->dbPointer->update($query, $params);
+				return $this->dbPointer->update($query, $params) != -1 ? true : false;
 			}
 		}
 		
@@ -102,13 +100,11 @@ class Db {
 	}
 	
 	public function getLastInsertId(){
-		Log::fatal("DB ERROR");
-		return $this->lastInsertId;
+		return $this->dbPointer->getLastInsertId();
 	}
 	
 	public function displayLog(){
-		Log::fatal("DB ERROR");
-		foreach($queryArray as $log){
+		foreach($this->queryArray as $log){
 			print($log . "<br />");
 		}
 	}
@@ -127,7 +123,7 @@ class Db {
 	}
 	
 	private function logQuery($inputQuery){
-		
+		array_push($this->queryArray, $inputQuery);
 	}
 	
 	public function isConnected(){
