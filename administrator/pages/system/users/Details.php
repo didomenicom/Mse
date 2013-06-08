@@ -23,7 +23,24 @@ function Details(){
 			
 			echo Text::pageTitle("User");
 			
-			echo $data->display();
+			?>
+			<script type="text/javascript">
+			function cancel(){
+				window.location.replace("<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=manage");
+			}
+			</script>
+			<div class="btn-toolbar pull-right" style="margin-top: 0px;">
+				<div class="btn-group">
+					<a class="btn" href="#"><i class="icon-print"></i></a>
+				</div>
+			</div>
+			<?php echo $data->display(); ?>
+			<div class="controls">
+				<div class="form-actions">
+					<button type="button" class="btn btn-primary" onClick="return cancel();">Close</button>
+				</div>
+			</div>
+			<?php
 		} else {
 			Messages::setMessage("An unknown error has occured", Define::get("MessageLevelError"));
 			Url::redirect(Url::getAdminHttpBase() . "/index.php?option=user&act=manage", 0, false);
