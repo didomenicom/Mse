@@ -12,6 +12,6 @@ defined("Access") or die("Direct Access Not Allowed");
  * Required for the system to work. 
  */
 function home(){
-	echo "Home";
+	// Do nothing
 }
 ?>
