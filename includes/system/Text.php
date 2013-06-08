@@ -12,12 +12,27 @@ defined("Access") or die("Direct Access Not Allowed");
  * It also handles the text verification
  */
 class Text {
-	public function dsp($text){
+	public static function display($text){
 		return stripslashes($text);
 	}
 	
-	public function store($text){
+	public static function store($text){
 		return addslashes($text);
+	}
+	
+	public static function sanitize($input){
+		$output = NULL;
+		
+		if(is_array($input) == true){
+			foreach($input as $key => $value){
+				$output[$key] = addslashes(htmlspecialchars($value));
+			}
+		} else {
+			$input = addslashes(htmlspecialchars($input));
+			$output = $input;
+		}
+		
+		return $output;
 	}
 	
 	public static function pageTitle($inputText){

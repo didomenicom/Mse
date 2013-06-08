@@ -142,6 +142,38 @@ class Url {
 		
 		return false;
 	}
+	
+	/**
+	 * Removes and returns a URL from the page history stack
+	 * Return URL or NULL if nothing exists
+	 */
+	public static function pageHistoryPop(){
+		// TODO: Complete
+	}
+	
+	/**
+	 * Adds a URL to the page history stack
+	 * Returns true on success, false otherwise
+	 */
+	public static function pageHistoryPush(){
+		// TODO: Complete
+	}
+	
+	/**
+	 * Views the top URL from the page history stack but toes not remove it
+	 * Return URL on success, NULL otherwise
+	 */
+	public static function pageHistoryPeek(){
+		// TODO: Complete
+	}
+	
+	/**
+	 * Get the url that called the current page
+	 * TODO: Remove and replace with page history stack
+	 */
+	public static function getPreviousPage(){
+		return Server::get("REQUEST_URI");
+	}
 }
 
 ?>
