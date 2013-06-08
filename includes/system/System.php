@@ -13,6 +13,7 @@ date_default_timezone_set("UTC");
 // Grab the Logging & Error Reporting Class
 if(!class_exists('Log')){
 	require_once(BASEPATH.INCLUDES . '/system/Log.php');
+	require_once(BASEPATH.INCLUDES . '/miscellaneous/MseException.php');
 }
 
 // Get the importing class

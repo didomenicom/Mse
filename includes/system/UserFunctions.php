@@ -25,18 +25,23 @@ class UserFunctions {
 			
 			// Check if a session exists
 			if(Cookie::exists($Config->getSystemVar('cookieName')) == true){
-				
 				ImportClass("User.UserSession");
 				
 				// 1. Find the cookie
 				$sessionId = Cookie::get($Config->getSystemVar('cookieName'));
 				
-				// 2. Create the UserSession
-				$userSession = new UserSession($sessionId);
-				
-				ImportClass("User.User");
-				
-				UserFunctions::$userInfo = new User($userSession->getUserId());
+				try {
+					// 2. Create the UserSession
+					$userSession = new UserSession($sessionId);
+					
+					// 3. Create the user
+					ImportClass("User.User");
+						
+					UserFunctions::$userInfo = new User($userSession->getUserId());
+				} catch (MseException $e) {
+					// TODO: Remove the cookie
+					
+				}
 			}
 		}
 		
