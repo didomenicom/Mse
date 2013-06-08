@@ -70,10 +70,19 @@ class ComponentRenderComponent extends ComponentRender {
 				// This is a specific function -- Find and load it
 				$option = ucfirst(strtolower(Url::getParts('option')));
 				
-				if(File::exists((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")), $option . ".php") == true){
+				// Check if the file exists in user
+				if(File::exists((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")), "user/" . $option . ".php") == true){
 					// Option exists - Read in the file and execute it
 					ob_start();
-					$result = ImportFile((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . $option . ".php");
+					$result = ImportFile((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . "user/" . $option . ".php");
+					$output = ob_get_contents();
+					ob_end_clean();
+				} else 
+				// Check if the file exists in system
+				if(File::exists((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")), "system/" . $option . ".php") == true){
+					// Option exists - Read in the file and execute it
+					ob_start();
+					$result = ImportFile((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . "system/" . $option . ".php");
 					$output = ob_get_contents();
 					ob_end_clean();
 				} else {
@@ -81,11 +90,20 @@ class ComponentRenderComponent extends ComponentRender {
 					$output = "The component you have requested doesn't appear to exist. If you have gotten this message in error, please contact an administrator"; // TODO: Add error message (red) class
 				}
 			} else {
-				// Check if the default file exists
-				if(File::exists((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")), DS . "home.php") == true){
+				// Check if the default file exists in user
+				if(File::exists((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")), DS . "user/home.php") == true){
 					// Read in the file and execute it
 					ob_start();
-					$result = ImportFile((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . "home.php");
+					$result = ImportFile((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . "user/home.php");
+					home();
+					$output = ob_get_contents();
+					ob_end_clean();
+				} else
+				// Check if the default file exists in system
+				if(File::exists((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")), DS . "system/home.php") == true){
+					// Read in the file and execute it
+					ob_start();
+					$result = ImportFile((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")) . DS . "system/home.php");
 					home();
 					$output = ob_get_contents();
 					ob_end_clean();
