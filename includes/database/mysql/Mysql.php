@@ -9,6 +9,7 @@ defined("Access") or die("Direct Access Not Allowed");
 
 class Mysql {
 	private $dbPointer = NULL;
+	private $lastInsertId = NULL;
 	
 	public function __sleep(){
 		return array();
@@ -39,7 +40,7 @@ class Mysql {
 				$statement->execute($params);
 				return $statement->fetchAll(PDO::FETCH_CLASS);
 			} catch(PDOException $e){
-				Log::warn("Mysql: query -- DB Error: '" . $e->getMessage() . "'");
+				Log::fatal("Mysql: query -- DB Error: '" . $e->getMessage() . "'");
 			}
 		}
 		
@@ -50,10 +51,11 @@ class Mysql {
 		if($this->dbPointer != NULL && isset($query) && $query != ""){
 			try {
 				$statement = $this->dbPointer->prepare($query);
-				
-				return $statement->execute($params);
+				$result = $statement->execute($params);
+				$this->lastInsertId = $this->dbPointer->lastInsertId();
+				return $result;
 			} catch(PDOException $e){
-				Log::warn("Mysql: insert -- DB Error: '" . $e->getMessage() . "'");
+				Log::fatal("Mysql: insert -- DB Error: '" . $e->getMessage() . "'");
 			}
 		}
 		
@@ -71,7 +73,7 @@ class Mysql {
 					return $statement->rowCount();
 				}
 			} catch(PDOException $e){
-				Log::warn("Mysql: delete -- DB Error: '" . $e->getMessage() . "'");
+				Log::fatal("Mysql: delete -- DB Error: '" . $e->getMessage() . "'");
 			}
 		}
 		
@@ -80,6 +82,7 @@ class Mysql {
 	
 	/**
 	 * Returns number of rows affected
+	 * -1 on error
 	 */
 	public function update($query, $params = array()){
 		if($this->dbPointer != NULL && isset($query) && $query != ""){
@@ -89,15 +92,15 @@ class Mysql {
 					return $statement->rowCount();
 				}
 			} catch(PDOException $e){
-				Log::warn("Mysql: update -- DB Error: '" . $e->getMessage() . "'");
+				Log::fatal("Mysql: update -- DB Error: '" . $e->getMessage() . "'");
 			}
 		}
 		
-		return NULL;
+		return -1;
 	}
 	
-	public function getPtr(){
-		return $this->dbPointer;
+	public function getLastInsertId(){
+		return $this->lastInsertId;
 	}
 }
 ?>
