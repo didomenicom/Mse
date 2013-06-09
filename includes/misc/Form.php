@@ -20,8 +20,13 @@ class Form {
 			// Get all of the parts of the url
 			foreach($_POST as $key => $value){
 				// Cleanup the parts
-				$key = strip_tags($key);
-				$value = strip_tags($value);
+				if(strlen($key) > 0){
+					$key = strip_tags($key);
+				}
+				
+				if(strlen($value) > 0){
+					$value = strip_tags($value);
+				}
 				
 				self::$formParts[$key] = $value;
 			}
