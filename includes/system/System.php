@@ -68,4 +68,8 @@ ImportClass("system.render");
 // Grab the Menu Class
 ImportClass("Menu.MenuGenerator");
 
+// Grab the "helper classes"
+ImportClass("Library");
+ImportClass("ClassesLibrary");
+
 ?>
