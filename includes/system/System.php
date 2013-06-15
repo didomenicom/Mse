@@ -72,4 +72,10 @@ ImportClass("Menu.MenuGenerator");
 ImportClass("Library");
 ImportClass("ClassesLibrary");
 
+// Check if there is a default class for the user
+// This file is located in /libraries/user/startup.php
+if(file_exists(BASEPATH.LIBRARY.USER . "/startup.php")){
+	ImportFile(BASEPATH.LIBRARY.USER . "/startup.php");
+}
+
 ?>
