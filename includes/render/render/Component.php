@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -125,8 +125,26 @@ class ComponentRenderComponent extends ComponentRender {
 					$output = ob_get_contents();
 					ob_end_clean();
 				} else {
-					// Option doesn't exist - Display error message
-					$output = "The component you have requested doesn't appear to exist. If you have gotten this message in error, please contact an administrator"; // TODO: Add error message (red) class
+					// Check if the file exists and is not case sensitive
+					$directory = NULL;
+					if($directoryHandle = opendir((Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")).DS . "user/")){
+						while(false !== ($directoryEntry = readdir($directoryHandle))){
+							if(strtolower($directoryEntry) === strtolower($option . ".php")){
+								$directory = (Define::get('baseSystem') == 1 ? Url::getAdminDirBase("pages") : Url::getDirBase("pages")).DS . "user/" . $directoryEntry;
+							}
+						}
+					}
+					
+					if($directory != NULL){
+						// Option exists - Read in the file and execute it
+						ob_start();
+						$result = ImportFile($directory);
+						$output = ob_get_contents();
+						ob_end_clean();
+					} else {
+						// Option doesn't exist - Display error message
+						$output = "The component you have requested doesn't appear to exist. If you have gotten this message in error, please contact an administrator"; // TODO: Add error message (red) class
+					}
 				}
 			} else {
 				// Check if the default file exists in user

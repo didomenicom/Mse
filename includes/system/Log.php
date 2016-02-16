@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -15,6 +15,12 @@ define("LG_WARN", 3);
 define("LG_INFO", 4);
 define("LG_DEBUG", 5);
 define("LG_ACTION", 6); // Log for user actions
+define("LG_DEPRECATED", 7); // Log for deprecated code
+
+// Define who is receiving the email
+if(!defined("LOG_EMAIL_RECIPIENT")){
+	define("LOG_EMAIL_RECIPIENT", "systemmessage@mouseware.net");
+}
 
 require_once(BASEPATH.INCLUDES . '/log/Log.php');
 
@@ -24,6 +30,12 @@ require_once(BASEPATH.INCLUDES . '/log/Log.php');
  * error array to be emailed out. 
  */
 function phpErrorHandler($errorNumber, $errorString, $errorFile, $errorLine, $variables){
+	// As per http://www.php.net//manual/en/language.operators.errorcontrol.php 
+	// Check to make sure the error was not suppressed before logging it. 
+	if(error_reporting() === 0){
+		return;
+	}
+	
 	$message = Log::createErrorMessage($errorNumber, $errorString, $errorFile, $errorLine, $variables);
 	
 	Log::always($message);
@@ -34,12 +46,31 @@ function phpErrorHandler($errorNumber, $errorString, $errorFile, $errorLine, $va
  * This function replaces the standard PHP Exception Handler. 
  * If an exception is hit, report the error and stop execution. 
  * 
- * The exception is added to the error array and will be emailed out when 
- * execution finishes
+ * TODO: convert stack trace to string
  */
 function phpExceptionHandler($e){
 	Log::addErrorHandlerArray($e);
-	die();
+	ob_start();
+	var_dump($someVar);
+	$result = ob_get_clean();
+	
+	$message = "Uncaught exception - " . get_class($e) . ": \n" . 
+		"Code: " . $e->getCode() . "\n" . 
+		"Message: " . htmlentities($e->getMessage()) . "\n" . 
+		"Stack Trace: " . $e->getTraceAsString() . "\n";
+	
+	// Send an email to the admin
+	$result = @mail(LOG_EMAIL_RECIPIENT, "System Message", $message);
+	
+	if($result == false){
+		Log::error("Email Exception Failed: " . $message);
+		error_log("Email Exception Handler Failed: " . $message, 0);
+	}
+	
+	// Display error page
+	if(Log::getDisplayErrorPage() == true){
+		echo "A system exception has occurred";
+	}
 }
 
 /**
@@ -47,7 +78,6 @@ function phpExceptionHandler($e){
  * It is going to check for errors and if there are any, it will combine all 
  * and email it to the email address.
  * Note: The email address is hard coded since all execution has completed.
- * TODO: See if email can be grabbed from Config
  */
 function errorHandlerCleanupFunction(){
 	// Grab all of the errors
@@ -69,7 +99,7 @@ function errorHandlerCleanupFunction(){
 		}
 		
 		// Send an email to the admin
-		$result = @mail("systemMessage@mouseware.net", "System Message", $message);
+		$result = @mail(LOG_EMAIL_RECIPIENT, "System Message", $message);
 		
 		if($result == false){
 			Log::error("Email Failed: " . $message);
@@ -78,7 +108,7 @@ function errorHandlerCleanupFunction(){
 		
 		// Display error page
 		if(Log::getDisplayErrorPage() == true){
-			echo "A system error has occured";
+			echo "A system error has occurred";
 		}
 	}
 }

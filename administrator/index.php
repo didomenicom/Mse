@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 define("Access", 1);
 
@@ -41,7 +41,7 @@ if(isset($_GET["ajaxRequest"]) && $_GET["ajaxRequest"] == 1){ // TODO: Add more 
 	
 	// Check if the request was handled properly 
 	if($result == false){
-		// An error has occured, return failure
+		// An error has occurred, return failure
 		echo -100;
 	}
 } else {

@@ -1,14 +1,11 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
-
-ImportClass("Library");
-Log::setDisplayErrorPage(true);
 
 /**
  * TODO: Add access permission for system handlers. Can edit expiration but cannot delete. 
@@ -61,21 +58,30 @@ class AjaxHandler extends Library {
 			$this->recordInfo['handlerId'] = $info->handlerId;
 			$this->recordText['handlerId'] = "Ajax Handler ID";
 			$this->recordGets['handlerId'] = "getHandlerId";
+			
 			$this->recordInfo['name'] = $info->name;
 			$this->recordText['name'] = "Name";
 			$this->recordGets['name'] = "getName";
+			
 			$this->recordInfo['className'] = $info->className;
 			$this->recordText['className'] = "Class Name";
 			$this->recordGets['className'] = "getClassName";
+			
 			$this->recordInfo['callerFunction'] = $info->callerFunction;
 			$this->recordText['callerFunction'] = "Caller Function";
 			$this->recordGets['callerFunction'] = "getCallerFunction";
+			
 			$this->recordInfo['createTimestamp'] = $info->createTimestamp;
 			$this->recordText['createTimestamp'] = "Created";
 			$this->recordGets['createTimestamp'] = "getCreateTimestamp";
+			
 			$this->recordInfo['expireTimestamp'] = $info->expireTimestamp;
 			$this->recordText['expireTimestamp'] = "Expires";
 			$this->recordGets['expireTimestamp'] = "getExpireTimestamp";
+			
+			$this->recordInfo['guestAccess'] = $info->guestAccess;
+			$this->recordText['guestAccess'] = "Guest Access";
+			$this->recordGets['guestAccess'] = "getGuestAccess";
 		}
 	}
 	
@@ -164,6 +170,23 @@ class AjaxHandler extends Library {
 		return 0;
 	}
 	
+	public function getGuestAccess($text = 0){
+		if($text == 1){
+			return self::getYesNoText($this->recordInfo['guestAccess']);
+		} else {
+			return (isset($this->recordInfo['guestAccess']) ? $this->recordInfo['guestAccess'] : 0);
+		}
+	}
+	
+	public function setGuestAccess($inputValue){
+		if(isset($inputValue)){
+			$this->recordInfo['guestAccess'] = $inputValue;
+			return 1;
+		}
+	
+		return 0;
+	}
+	
 	public function canDelete(){ // TODO: Finish
 		return true;
 	}
@@ -192,7 +215,8 @@ class AjaxHandler extends Library {
 				"name='" . addslashes(self::getName()) . "', " . 
 				"className='" . addslashes(self::getClassName()) . "', " . 
 				"callerFunction='" . addslashes(self::getCallerFunction()) . "', " . 
-				"expireTimestamp='" . addslashes(self::getExpireTimestamp()) . "' " . 
+				"expireTimestamp='" . addslashes(self::getExpireTimestamp()) . "', " . 
+				"guestAccess='" . addslashes(self::getGuestAccess()) . "' " . 
 				"WHERE id=" . $this->recordInfo['id']);
 				
 			if($result == true){
@@ -202,13 +226,14 @@ class AjaxHandler extends Library {
 				Log::action("User (" . self::getId() . ") edited: " . ($changes != "" ? $changes : "None"));
 			}
 		} else {
-			$result = $db->insert("INSERT INTO ajaxHandler (handlerId, name, className, callerFunction, createTimestamp, expireTimestamp) VALUES (" . 
+			$result = $db->insert("INSERT INTO ajaxHandler (handlerId, name, className, callerFunction, createTimestamp, expireTimestamp, guestAccess) VALUES (" . 
 				"'" . self::generateUniqueId() . "', " . 
 				"'" . addslashes(self::getName()) . "', " . 
 				"'" . addslashes(self::getClassName()) . "', " . 
 				"'" . addslashes(self::getCallerFunction()) . "', " . 
 				"'" . addslashes(self::getCreateTimestamp()) . "', " . 
-				"'" . addslashes(self::getExpireTimestamp()) . "')");
+				"'" . addslashes(self::getExpireTimestamp()) . "', " . 
+				"'" . addslashes(self::getGuestAccess()) . "')");
 				
 			if($result == true){
 				Log::action("Ajax Handler (" . self::getId() . ") added");

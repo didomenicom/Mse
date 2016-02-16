@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2013 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 

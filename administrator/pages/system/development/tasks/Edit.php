@@ -1,6 +1,6 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
  * @copyright 2008 - 2013 Mike Di Domenico
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
@@ -23,46 +23,33 @@ function Edit(){
 			echo Text::pageTitle((Url::getParts('task') === "edit" ? "Edit" : "Add") . " Task");
 			?>
 			<script type="text/javascript">
-			function checkForm(){
-				if($("#inputName").val() == ""){
-					$("#formMessages").html("You need to enter a name").removeClass("hidden");
-					return false;
-				}
-				
-				return true;
-			}
-			
-			function cancel(){
-				window.location.replace("<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=manage");
-			}
+			$(document).ready(function(){
+				$("#adminForm").submit(function(e){
+					if($("#inputName").val() == ""){
+						$("#formMessages").html("You need to enter a name").removeClass("hidden");
+						e.preventDefault();
+					}
+				});
+			});
 			</script>
-			<div id="formMessages" class="alert alert-error hidden"></div>
-			<form name="adminForm" id="adminForm" method="post" action="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=<?php echo (Url::getParts('act') === "edit" ? "edit" . ($id > 0 ? "&id=" . $id : "") : "add"); ?>&result=1">
-				<div class="control-group">
-					<label class="control-label" for="inputName">Name</label>
-					<div class="controls">
-						<input type="text" name="inputName" id="inputName" value="<?php echo ($id > 0 ? $data->getName(1) : ""); ?>" />
+			<div id="formMessages" class="alert alert-danger hidden"></div>
+			<form name="adminForm" id="adminForm" method="post" action="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=<?php echo (Url::getParts('task') === "edit" ? "edit" . ($id > 0 ? "&id=" . $id : "") : "add"); ?>&result=1">
+				<div class="row">
+					<div class="form-group col-sm-5">
+						<label for="inputName">Name</label>
+						<input type="text" class="form-control" name="inputName" id="inputName" value="<?php echo ($id > 0 ? $data->getName(1) : ""); ?>" />
 					</div>
 				</div>
-				<div class="control-group">
-					<label class="control-label" for="inputDescription">Description</label>
-					<div class="controls">
-						<textarea name="inputDescription" id="inputDescription" rows="3"><?php echo ($id > 0 ? $data->getDescription(1) : ""); ?></textarea>
+				<div class="row">
+					<div class="form-group col-sm-5">
+						<label for="inputDescription">Description</label>
+						<textarea name="inputDescription" id="inputDescription" rows="8" class="field col-md-12"><?php echo ($id > 0 ? $data->getDescription(1) : ""); ?></textarea>
 					</div>
 				</div>
-				<div class="control-group">
-					<label class="control-label" for="inputCompleted">Completed</label>
-					<div class="controls">
-						<select name="inputCompleted" id="inputCompleted">
-							<option value="0"<?php echo ($id > 0 ? ($data->getCompleted() == 0 ? "selected=\"selected\"" : "") : "selected=\"selected\""); ?>>No</option>
-							<option value="1"<?php echo ($id > 0 && $data->getCompleted() == 1 ? "selected=\"selected\"" : ""); ?>>Yes</option>
-						</select>
-					</div>
-				</div>
-				<div class="controls">
-					<div class="form-actions">
-						<button type="submit" class="btn btn-primary" onClick="return checkForm();">Save changes</button>
-						<button type="button" class="btn" onClick="return cancel();">Cancel</button>
+				<div class="row">
+					<div class="form-group col-sm-5">
+						<button type="submit" class="btn btn-primary">Save changes</button>
+						<a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=manage" class="btn btn-default">Cancel</a>
 					</div>
 				</div>
 			</form>
@@ -83,7 +70,10 @@ function Edit(){
 				// Save it
 				$data->setName($info['inputName']);
 				$data->setDescription($info['inputDescription']);
-				$data->setCompleted($info['inputCompleted']);
+				
+				if($id == 0){
+					$data->setVerifyBy(UserFunctions::getLoggedIn()->getId());
+				}
 				
 				if($data->save() == true){
 					if($id > 0){
@@ -101,7 +91,7 @@ function Edit(){
 		}
 	} else {
 		Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
-		Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+		Url::redirect(Url::home(), 3, false);
 	}
 }
 

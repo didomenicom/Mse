@@ -1,32 +1,32 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
 function tasks(){
 	switch(Url::getParts('task')){
 		case 'manage':
-			ImportFile(Url::getAdminDirBase() . DS . "pages/development/ajaxHandler/Manage.php");
+			ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/ajaxHandler/Manage.php");
 			Manage();
 			break;
 			
 		case 'add':
 		case 'edit':
-			ImportFile(Url::getAdminDirBase() . DS . "pages/development/ajaxHandler/Edit.php");
+			ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/ajaxHandler/Edit.php");
 			Edit();
 			break;
 			
 		case 'delete':
-			ImportFile(Url::getAdminDirBase() . DS . "pages/development/ajaxHandler/Delete.php");
+			ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/ajaxHandler/Delete.php");
 			Delete();
 			break;
 		
 		case 'details':
-			ImportFile(Url::getAdminDirBase() . DS . "pages/development/ajaxHandler/Details.php");
+			ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/ajaxHandler/Details.php");
 			Details();
 			break;
 		

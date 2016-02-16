@@ -4,13 +4,13 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title><mse:include type="header" name="title" /></title>
 <mse:include type="header" />
+<script type="text/javascript" src="<?php echo Url::getHttpBase('template'); ?>/mouseware/jquery/jquery-2.0.3.min.js"></script>
+<script type="text/javascript" src="<?php echo Url::getHttpBase('template'); ?>/mouseware/bootstrap/js/bootstrap.min.js"></script>
 <link href="<?php echo Url::getHttpBase('template'); ?>/mouseware/bootstrap/css/bootstrap.css" rel="stylesheet" />
 <link href="<?php echo Url::getHttpBase('template'); ?>/mouseware/bootstrap/css/bootstrap-responsive.css" rel="stylesheet" />
 <!--[if lt IE 9]>
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->
-<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
-<script type="text/javascript" src="<?php echo Url::getHttpBase('template'); ?>/mouseware/bootstrap/js/bootstrap.min.js"></script>
 <style type="text/css">
 body {
 	padding-top: 60px;
@@ -23,8 +23,6 @@ ul.nav li.dropdown:hover > ul.dropdown-menu{
     display: block;   
 	margin: 0; 
 }
-
-
 </style>
 </head>
 <body>

@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -35,12 +35,17 @@ class Text {
 		return $output;
 	}
 	
+	/**
+	 * Displays the text as a page header. Currently supports bootstrap 2
+	 * TODO: Remove
+	 */
 	public static function pageTitle($inputText){
 		return "<div class=\"page-header\" style=\"margin-top: 0px; margin-bottom: 5px;\"><h1>" . $inputText . "</h1></div>";
 	}
 	
 	/**
 	 * Verifies if a date is in a valid format of something similar to MMDDYYYY
+	 * TODO: Move to Date class?
 	 */
 	public static function verifyStandardDateFormat($inputText){
 		return (preg_match("/^((0?[1-9]|1[012])[- \/.](0?[1-9]|[12][0-9]|3[01])[- \/.](19|20)?[0-9]{2})*$/", $inputText) == 1 ? true : false);
@@ -48,9 +53,18 @@ class Text {
 	
 	/**
 	 * Verifies if a date is in a valid format of something similar to YYYYMMDD
+	 * TODO: Move to Date class?
 	 */
 	public static function verifyDbDateFormat($inputText){
 		return (preg_match("/^([0-9]{4})(0?[1-9]|1[012])(0?[1-9]|[12][0-9]|3[01])*$/", $inputText) == 1 ? true : false);
+	}
+	
+	/**
+	 * Verifies if a date is in a valid format of something similar to YYYYMMDD
+	 * TODO: Move to Date class?
+	 */
+	public static function verifySqlDateTimeFormat($inputText){
+		return true; // TODO: Finish
 	}
 	
 	/**
@@ -75,38 +89,228 @@ class Text {
 	}
 	
 	
-	
 	/**
-	 * Converts an input date in the format of MM/DD/YYYY into a database format of YYYYMMDD
+	 * Verifies if a date is in a valid format of something similar to YYYY-MM-DD
+	 * TODO: Move to Date class?
 	 */
-	public static function convertStandardDateToDbDateFormat($inputText){
-		// Check if the input is in standard format
-		if(Text::verifyStandardDateFormat($inputText) == true){
-			$inputText = preg_replace_callback('/((0?[1-9]|1[012])[- \/.](0?[1-9]|[12][0-9]|3[01])[- \/.]((19|20)?[0-9]{2}))/', 
-								function($matches){
-									return (strlen($matches[4]) == 2 ? "20" : "") . $matches[4] . (strlen($matches[2]) == 1 ? "0" : "") . $matches[2] . (strlen($matches[3]) == 1 ? "0" : "") . $matches[3]; 
-								}, 
-							$inputText);
-			return $inputText;
-		}
-		
-		return "";
+	public static function verifySqlDateFormat($inputText){
+		return (preg_match("/^([0-9]{4})-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])*$/", $inputText) == 1 ? true : false);
 	}
 	
 	/**
-	 * Converts an input date in the format of YYYYMMDD into a database format of MM/DD/YYYY
+	 * Verifies if a date is in a valid format of something similar to HH:MM:SS
+	 * TODO: Move to Date class?
+	 */
+	public static function verifySqlTimeFormat($inputText){
+		return (preg_match("/^([0-9]{2}):([0-9]{2}):([0-9]{2})*$/", $inputText) == 1 ? true : false);
+	}
+	
+	/**
+	 * Verifies if a date is in a valid format of something similar to HHMM or HHMMSS
+	 * TODO: Move to Date class?
+	 */
+	public static function verifyMilitaryTimeFormat($inputText){
+		return (preg_match("/^(0?[0-9]|1[0-9]|2[0-4])([0-9]{2})*$/", $inputText) == 1 ? true : (preg_match("/^(0?[0-9]|1[0-9]|2[0-4])([0-9]{2})([0-9]{2})*$/", $inputText) == 1 ? true : false));
+	}
+	
+	/**
+	 * Converts an input date in the format of MM/DD/YYYY into a database format of YYYYMMDD
+	 * TODO: Move to Date class?
+	 */
+	public static function convertStandardDateToDbDateFormat($inputText){
+		// Check if the input is in standard format
+		if(strlen($inputText) > 0 && Text::verifyStandardDateFormat($inputText) == true){
+			$timestamp = DateTime::createFromFormat('m/d/Y', $inputText);
+			return $timestamp->format('Ymd');
+		}
+		
+		return NULL;
+	}
+	
+	/**
+	 * Converts an input date in the format of YYYYMMDD into a format of MM/DD/YYYY
+	 * TODO: Move to Date class?
 	 */
 	public static function convertDbDateToStandardDateFormat($inputText){
 		// Check if the input is in standard format
 		if(Text::verifyDbDateFormat($inputText) == true){
 			return substr($inputText, 4, 2) . "/" . substr($inputText, 6, 2) . "/" . substr($inputText, 0, 4);
 		}
+		
+		return "";
+	}
+	
+	/**
+	 * Converts an input date in the format of MM/DD/YYYY into a sql database format (Y-m-d) of YYYY-MM-DD
+	 * TODO: Move to Date class?
+	 */
+	public static function convertStandardDateToSqlDateFormat($inputText){
+		$timestamp = DateTime::createFromFormat('m/d/Y', $inputText);
+		return $timestamp->format('Y-m-d');
+	}
+	
+	/**
+	 * Converts an input date in the format of MM/DD/YYYY into a sql database format (Y-m-d H:i:s) of YYYY-MM-DD HH:MM:SS 
+	 * TODO: Move to Date class?
+	 */
+	public static function convertStandardDateToSqlDateTimeFormat($inputText, $includeTime = true){
+		// Check if the input is in standard format
+		if(Text::verifyStandardDateFormat($inputText) == true){
+			return substr($inputText, 4, 2) . "-" . substr($inputText, 6, 2) . "-" . substr($inputText, 0, 4) . ($includeTime == true ? " 00:00:00" : "");
+		}
 	
 		return "";
 	}
 	
+	/**
+	 * Converts an input date in the format of YYYYMMDD into a sql database format (Y-m-d H:i:s) of YYYY-MM-DD HH:MM:SS
+	 * TODO: Move to Date class?
+	 */
+	public static function convertDbDateToSqlDateTimeFormat($inputText, $includeTime = true){
+		// Check if the input is in standard format
+		if(Text::verifyDbDateFormat($inputText) == true){
+			return substr($inputText, 0, 4) . "-" . substr($inputText, 4, 2) . "-" . substr($inputText, 6, 2) . ($includeTime == true ? " 00:00:00" : "");
+		}
 	
+		return "";
+	}
 	
+	/**
+	 * Converts an input date in the format of YYYYMMDD into a sql database format (Y-m-d) of YYYY-MM-DD
+	 * TODO: Move to Date class?
+	 */
+	public static function convertDbDateToSqlDateFormat($inputText){
+		// Check if the input is in standard format
+		if(Text::verifyDbDateFormat($inputText) == true){
+			return substr($inputText, 0, 4) . "-" . substr($inputText, 4, 2) . "-" . substr($inputText, 6, 2);
+		}
+	
+		return "";
+	}
+	
+	/**
+	 * Converts an input date in the format of YYYY-MM-DD HH:MM:SS into a php time() format
+	 * TODO: Move to Date class? 
+	 */
+	public static function convertSqlDateTimeToPhpTimeFormat($inputText){
+		return strtotime($inputText, Date::getCurrentTimeStamp());
+	}
+	
+	/**
+	 * Checks if an input string is standard characters
+	 * Standard characters are a-z, A-Z, 0-9, '.', '-', '_', and ' '
+	 */
+	public static function verifyStandardCharacters($inputText){
+		return (preg_match("/^[a-zA-Z0-9\.\-\_\s]+$/", $inputText) == 1 ? true : false);
+	}
+	
+	/**
+	 * This function will trim the end of a string if inputTrimCharacters is at the end of the string
+	 * TODO: Have it work anywhere in the string (remove EndOf off the name)
+	 * TODO: Use regex to do this
+	 */
+	public static function trimEndOfString($inputString, $inputTrimCharacters){
+		if(isset($inputString) && isset($inputTrimCharacters)){
+			if(substr($inputString, (strlen($inputString) - strlen($inputTrimCharacters)), strlen($inputTrimCharacters)) === $inputTrimCharacters){
+				return substr($inputString, 0, (strlen($inputString) - strlen($inputTrimCharacters)));
+			}
+		}
+		
+		return $inputString;
+	}
+	
+	/**
+	 * This function will trim the beginning of a string if inputTrimCharacters is at the beginning of the string
+	 * TODO: Have it work anywhere in the string (remove BeginningOf off the name)
+	 * TODO: Use regex to do this
+	 */
+	public static function trimBeginningOfString($inputString, $inputTrimCharacters){
+		if(isset($inputString) && isset($inputTrimCharacters)){
+			if(substr($inputString, 0, strlen($inputTrimCharacters)) === $inputTrimCharacters){
+				return substr($inputString, strlen($inputTrimCharacters), strlen($inputString));
+			}
+		}
+		
+		return $inputString;
+	}
+	
+	/**
+	 * Converts a string into bytes
+	 * For example, 30M is equal to 30 MB and in turn 30000000
+	 * Supported units are B, K, M, G
+	 * @param unknown_type $inputString
+	 */
+	public static function convertFilesizeStringToBytes($inputString){
+		if(strlen($inputString) > 0){
+			// Figure out the unit
+			$unit = substr($inputString, (strlen($inputString) - 1), 1);
+			$value = (int)substr($inputString, 0, (strlen($inputString) - 1));
+			
+			switch($unit){
+				case "B":
+					return ($value * pow(1000, 0));
+					break;
+				case "K":
+					return ($value * pow(1000, 1));
+					break;
+				case "M":
+					return ($value * pow(1000, 2));
+					break;
+				case "G":
+					return ($value * pow(1000, 3));
+					break;
+				default:
+					break;
+			}
+		}
+		
+		return 0;
+	}
+	
+	/**
+	 * Converts a true/false number into Yes/No text
+	 */
+	public static function getYesNo($inputNumber){
+		switch($inputNumber){
+			case 0:
+				return "No";
+				break;
+			case 1:
+				return "Yes";
+				break;
+			default:
+				Log::warn("Text.getYesNo() -- Unknown value - '" . $inputNumber . "'");
+				return "Unknown";
+				break;
+		}
+	}
+	
+	/**
+	 * Converts a true/false number into True/False text
+	 */
+	public static function getTrueFalse($inputNumber){
+		switch($inputNumber){
+			case 0:
+				return "False";
+				break;
+			case 1:
+				return "True";
+				break;
+			default:
+				Log::warn("Text.getTrueFalse() -- Unknown value - '" . $inputNumber . "'");
+				return "Unknown";
+				break;
+		}
+	}
+	
+	/**
+	 * Takes a number and formats into a USD currency format
+	 */
+	public static function formatCurrencyNumber($inputValue, $displayUSDSymbol = true){
+		if(isset($inputValue)){
+			return ($displayUSDSymbol == true ? "$" : "") . number_format($inputValue, 2, '.', ',');
+		}
+	}
 	
 	/** 
 	 * This function will handle all of the sorting for table headers. 
@@ -218,9 +422,28 @@ class Text {
 					}
 				$Render->addContent("</select>");
 			}
-		}		
+		}
 	}
-
-
+	
+	/**
+	 * This function will find and replace characters/substrings in a string. 
+	 */
+	public static function findReplaceString($inputString, $findReplaceArray){
+		if(isset($inputString) && isset($findReplaceArray) && strlen($inputString) > 0 && is_array($findReplaceArray)){
+			foreach($findReplaceArray as $find => $replace){
+				$inputString = str_replace($find, $replace, $inputString);
+			}
+		}
+	
+		return $inputString;
+	}
+	
+	/**
+	 * 
+	 */
+	public static function sanitizeXMLData($inputString){
+		$array = array("&" => "&amp;");
+		return Text::findReplaceString($inputString, $array);
+	}
 }
 ?>

@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -14,8 +14,8 @@ function Handler($task){
 			// Grab the walker class
 			ImportClass("User.Users");
 			
+			$filter['hasAccess'] = true;
 			$filter['deleted'] = (isset($_POST['deleted']) && $_POST['deleted'] == 1 ? true : false);
-			
 			$filter['permissionGroup'] = (isset($_POST["val"]) && $_POST["val"] > 0 ? $_POST["val"] : NULL);
 			$items = new Users($filter);
 			$output = "";
@@ -104,6 +104,52 @@ function Handler($task){
 			
 			// Return it
 			echo $output;
+		}
+		
+		if($task === "sort"){
+			if(isset($_POST["val"]) && $_POST["val"] !== ""){
+				$inputSort = $_POST["val"];
+				
+				// Remove the 'sort_' from the input
+				if(substr($inputSort, 0, 5) === "sort_"){
+					$inputSort = substr($inputSort, 5, (strlen($inputSort)));
+				}
+				
+				$userSortBy = UserFunctions::getLoggedIn()->getSetting("sort.by.users"); 
+				$userSortDirection = UserFunctions::getLoggedIn()->getSetting("sort.direction.users");
+				
+				if($inputSort === $userSortBy){
+					// Update direction
+					$userSortDirection = (strtoupper($userSortDirection) === "ASC" ? "DESC" : "ASC");
+					
+					// Save it
+					UserFunctions::getLoggedIn()->setSettings("sort.direction.users", $userSortDirection);
+					
+					UserFunctions::getLoggedIn()->saveSettings();
+					
+					if(UserFunctions::getLoggedIn()->saveSettings() == true){
+						echo 1;
+					} else {
+						echo 0;
+					}
+				} else {
+					// Update by
+					$userSortBy = $inputSort; // TODO: Check for valid sort
+					
+					// Update to default direction
+					$userSortDirection = "ASC";
+					
+					// Save it
+					UserFunctions::getLoggedIn()->setSettings("sort.by.users", $userSortBy);
+					UserFunctions::getLoggedIn()->getSetting("sort.direction.users", $userSortDirection);
+					
+					if(UserFunctions::getLoggedIn()->saveSettings() == true){
+						echo 1;
+					} else {
+						echo 0;
+					}
+				}
+			}
 		}
 	}
 	

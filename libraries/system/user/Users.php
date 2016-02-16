@@ -1,13 +1,11 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
-
-ImportClass("ClassesLibrary");
 
 class Users extends ClassesLibrary {
 	private $recordIndex = 0;
@@ -16,7 +14,7 @@ class Users extends ClassesLibrary {
 	private $rowCount = 0;
 	private $totalRows = 0;
 	
-	public function Users($filter = array()){
+	public function Users($filter = array(), $sort = array(), $countArray = array()){
 		global $db;
 		
 		// Build array to generate filtering string
@@ -32,11 +30,15 @@ class Users extends ClassesLibrary {
 			}
 		}
 		
+		// Setup the sorting
+		$sort['by'] = (!isset($sort['by']) ? "id" : $sort['by']);
+		$sort['direction'] = (!isset($sort['direction']) ? "ASC" : $sort['direction']);
+		
 		// Filters
 		$filterString = ClassesLibrary::generateFilterString($filter, $filterArray, $filterLogic);
 		
 		// Execute query
-		$rowsCount = $db->fetchObject("SELECT id FROM users" . $filterString . ClassesLibrary::generateSortingString() . ClassesLibrary::generateRowsCountString());
+		$rowsCount = $db->fetchObject("SELECT id FROM users" . $filterString . ClassesLibrary::generateSortingString($sort) . ClassesLibrary::generateRowsCountString($countArray));
 		
 		if($rowsCount > 0){
 			ImportClass("User.User");
@@ -44,10 +46,22 @@ class Users extends ClassesLibrary {
 			while($db->fetchObjectHasNext() == true){
 				$row = $db->fetchObjectGetNext();
 				
-				$this->recordQueryArray[$this->rowCount] = new User($row->id);
-				$this->rowCount++;
-				$this->totalRows++;
+				$user = new User($row->id);
+				
+				if(isset($filter['hasAccess']) && $filter['hasAccess'] == true){
+					// This will only select items that the current logged in user has access to
+					if(UserFunctions::getLoggedIn()->hasAccess($user->getPermissionGroup()) == true){
+						$this->recordQueryArray[$this->rowCount] = $user;
+						$this->rowCount++;
+						$this->totalRows++;
+					}
+				} else {
+					$this->recordQueryArray[$this->rowCount] = $user;
+					$this->rowCount++;
+					$this->totalRows++;
+				}
 			}
+			
 			$db->fetchObjectDestroy();
 		}
 	}

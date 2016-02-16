@@ -1,14 +1,13 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2013 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
-ImportClass("Library");
-
+// TODO: Rename to HelpMenu
 class Help extends Library {
 	protected $recordInfo = array('id' => 0);
 	private $recordText = array('id' => "ID");
@@ -20,18 +19,18 @@ class Help extends Library {
 		}
 	}
 	
-	public function setId($inputId, $buildData = 0){
-		if($inputId > 0){
-			$this->recordInfo['id'] = $inputId;
+	public function setId($inputId, $buildData = true){
+		if(is_numeric($inputId) && intval($inputId) > 0){
+			$this->recordInfo['id'] = intval($inputId);
 			
-			if($buildData == 0){
-				self::buildData();
+			if($buildData == true){
+				return self::buildData();
 			}
 			
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
 	public function getId(){
@@ -62,7 +61,7 @@ class Help extends Library {
 				ImportClass("Component.Component");
 				
 				$component = new Component($this->recordInfo['component']);
-				return $component->getName();
+				return $component->getDisplayName();
 			}
 		} else {
 			return $this->recordInfo['component'];
@@ -72,10 +71,10 @@ class Help extends Library {
 	public function setComponent($inputValue){
 		if(isset($inputValue)){
 			$this->recordInfo['component'] = $inputValue;
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
 	public function getTitle($text = 0){
@@ -89,10 +88,10 @@ class Help extends Library {
 	public function setTitle($inputValue){
 		if(isset($inputValue)){
 			$this->recordInfo['title'] = $inputValue;
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
 	public function getContent($text = 0){
@@ -106,10 +105,10 @@ class Help extends Library {
 	public function setContent($inputValue){
 		if(isset($inputValue)){
 			$this->recordInfo['content'] = $inputValue;
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
 	public function canDelete(){
@@ -133,7 +132,7 @@ class Help extends Library {
 			$result = $db->update("UPDATE help SET " . 
 				"component='" . addslashes(self::getComponent()) . "', " . 
 				"title='" . addslashes(self::getTitle()) . "', " . 
-				"content='" . addslashes(self::getContent()) . "' " . 
+				"content='" . htmlspecialchars(addslashes(self::getContent())) . "' " . 
 				"WHERE id=" . addslashes(self::getId()));
 			
 			if($result == 1){
@@ -146,9 +145,10 @@ class Help extends Library {
 			$result = $db->insert("INSERT INTO help (component, title, content) VALUES (" . 
 				"'" . addslashes(self::getComponent()) . "', " . 
 				"'" . addslashes(self::getTitle()) . "', " . 
-				"'" . addslashes(self::getContent()) . "')");
+				"'" . htmlspecialchars(addslashes(self::getContent())) . "')");
 			
 			if($result == 1){
+				self::setId($db->getLastInsertId());
 				Log::action("Help (" . self::getId() . ") added");
 			}
 		}

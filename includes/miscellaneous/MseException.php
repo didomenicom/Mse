@@ -1,19 +1,19 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2013 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
 class MseException extends Exception {
 	// Redefine the exception so message isn't optional
-	public function __construct($message, $code = 0, Exception $previous = null) {
+	public function __construct($message, $code = 0) {
 		// some code
 	
 		// make sure everything is assigned properly
-		parent::__construct($message, $code, $previous);
+		parent::__construct($message, $code);
 	}
 	
 	// custom string representation of object

@@ -1,4 +1,12 @@
 <?php
+/**
+ * Mse - PHP development framework for web applications
+ * @author Mike Di Domenico
+ * @copyright 2012 - 2013 Mike Di Domenico
+ * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ */
+defined("Access") or die("Direct Access Not Allowed");
+
 class Tasks {
 	private $recordIndex = 0;
 	private $recordQueryArray = array();
@@ -8,8 +16,7 @@ class Tasks {
 	public function Tasks($filter = 0){
 		global $db;
 		
-		
-		$rowsCount = $db->fetchObject("SELECT id FROM developmentTasks" . (isset($filter['completed']) ? ($filter['completed'] == true ? " WHERE completed=1" : " WHERE completed=0") : ""));
+		$rowsCount = $db->fetchObject("SELECT id FROM developmentTasks" . (isset($filter['verified']) ? ($filter['verified'] == true ? " WHERE verified=1" : " WHERE verified=0") : ""));
 		
 		if($rowsCount > 0){
 			ImportClass("Development.Tasks.Task");

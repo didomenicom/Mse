@@ -1,12 +1,15 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
+/**
+ * base64_encode and base64_decode taken from http://stackoverflow.com/questions/1374753/passing-base64-encoded-strings-in-url/1374789#1374789
+ */
 class Url {
 	private static $root = "";
 	private static $dirRoot = "";
@@ -50,10 +53,11 @@ class Url {
 	
 	/**
 	 * Creates the http url for the system root (frontend)
+	 * TODO: Create getSecureRoot() for https only urls
 	 */
 	private static function getRoot(){
 		if(self::$root == ""){
-			self::$root = "http://" . $_SERVER['HTTP_HOST'] . self::getDirectory();
+			self::$root = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === "on" ? "https://" : "http://") . (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : "") . self::getDirectory();
 		}
 		
 		return self::$root;
@@ -173,6 +177,34 @@ class Url {
 	 */
 	public static function getPreviousPage(){
 		return Server::get("REQUEST_URI");
+	}
+	
+	/**
+	 * 
+	 */
+	public static function base64_encode($input){
+		return strtr($input, '+/=', '-_~');
+	}
+	
+	/**
+	 * 
+	 */
+	public static function base64_decode($input){
+		return strtr($input, '-_~', '+/=');
+	}
+	
+	/**
+	 * 
+	 */
+	public static function isSecureConnection(){
+		return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === "on" ? true : false);
+	}
+	
+	/**
+	 * 
+	 */
+	public static function navigateToSecureConnection(){
+		// TODO: Redirect the current page to https
 	}
 }
 

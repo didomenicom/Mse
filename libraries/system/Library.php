@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -50,6 +50,22 @@ class Library {
 	public function formatCurrencyNumber($inputValue, $displayUSDSymbol = true){
 		if(isset($inputValue)){
 			return ($displayUSDSymbol == true ? "$" : "") . number_format($inputValue, 2, '.', ',');
+		}
+	}
+	
+	/**
+	 * Finds the user and returns the users name
+	 * This is used to get the user name of users that are not the currently logged in user
+	 */
+	public function getUsernameText($inputUserId){
+		if($inputUserId > 0){
+			ImportClass("User.User");
+			$user = new User($inputUserId);
+			return $user->getName();
+		} else if($inputUserId == -1){
+			return "System";
+		} else {
+			return "N/A";
 		}
 	}
 	
@@ -122,6 +138,9 @@ class Library {
 	 * Assumptions:
 	 * Method(1) is display text
 	 * Method is in the format getXXX()
+	 * TODO: Change Class Object to array with variableText and class gets inside
+	 * TODO: Add logic for when to display
+	 * TODO: Add logic to handle calls... Ex: functionName(3)
 	 */
 	public function displayInfo($classObject, $variableText, $classGets = NULL){
 		$callableFunction = new ReflectionClass($classObject);
@@ -139,8 +158,7 @@ class Library {
 		// Loop through all of the variableText items
 		foreach($variableText as $variable => $value){
 			if(isset($classGets[$variable])){
-				$indx = array_search($classGets[$variable], $calls);
-				if($indx != false){
+				if(($indx = array_search($classGets[$variable], $calls)) !== false){
 					// This is the function
 					echo "<strong>" . $value . ":</strong> " . $classObject->$calls[$indx](1) . "<br />";
 				}
@@ -148,6 +166,234 @@ class Library {
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * This function will trim the end of a string if inputTrimCharacters is at the end of the string
+	 * TODO: Have it work anywhere in the string (remove EndOf off the name)
+	 * TODO: Use regex to do this
+	 */
+	public static function trimEndOfString($inputString, $inputTrimCharacters){
+		if(isset($inputString) && isset($inputTrimCharacters)){
+			if(substr($inputString, (strlen($inputString) - strlen($inputTrimCharacters)), strlen($inputTrimCharacters)) === $inputTrimCharacters){
+				return substr($inputString, 0, (strlen($inputString) - strlen($inputTrimCharacters)));
+			}
+		}
+		
+		return $inputString;
+	}
+	
+	/**
+	 * This function will trim the beginning of a string if inputTrimCharacters is at the beginning of the string
+	 * TODO: Have it work anywhere in the string (remove BeginningOf off the name)
+	 * TODO: Use regex to do this
+	 */
+	public static function trimBeginningOfString($inputString, $inputTrimCharacters){
+		if(isset($inputString) && isset($inputTrimCharacters)){
+			if(substr($inputString, 0, strlen($inputTrimCharacters)) === $inputTrimCharacters){
+				return substr($inputString, strlen($inputTrimCharacters), strlen($inputString));
+			}
+		}
+		
+		return $inputString;
+	}
+	
+	/**
+	 * This function... 
+	 * inputXMLString is the string in the components table that has the data based upon the dynamic field structure
+	 * The dynamic field structure is build out of the inputXMLStructureString and inputXMLHeaderString where the 
+	 * inputXMLHeaderString is display info for inputXMLStructureString
+	 * 
+	 * TODO: Handle the filter
+	 */
+	public function getDynamicFieldsArray($inputXMLString, $inputXMLStructureString, $filter = NULL){
+		ImportClass("Xml.XMLHandler");
+		
+		if(is_string($inputXMLStructureString) && strlen($inputXMLStructureString) > 0){
+			// Get the config structure
+			$xmlHandler = new XMLHandler();
+			$xmlHandler->setXMLString(trim(preg_replace('/[\t\n\r]+/', '', $inputXMLStructureString)));
+			$structureXMLArray = $xmlHandler->getNodeArray("config > configRecord");
+			
+			// Build the array strcture
+			$dynamicFieldStructureArray = array();
+			
+			foreach($structureXMLArray as $struct){
+				$tmpArray = array();
+				$struct = $struct['configValue'];
+				
+				foreach($struct as $items){
+					$tmpArray[$items['index']] = $items['value'];
+					
+					if(isset($items['options'])){
+						$tmpArray['options'] = array();
+						foreach($items['options'][0]['option'] as $option){
+							$tmpArray['options'][$option['index']] = $option['displayName'];
+						}
+					}
+				}
+				
+				if(isset($tmpArray['index'])){
+					$dynamicFieldStructureArray[$tmpArray['index']] = $tmpArray;
+				}
+			}
+			
+			// Break apart the input string
+			if(isset($inputXMLString) && strlen($inputXMLString) > 0){
+				$xmlHandler = new XMLHandler();
+				$xmlHandler->setXMLString(trim(preg_replace('/[\t\n\r]+/', '', $inputXMLString)));
+				$dynamicXMLArray = $xmlHandler->getNodeArray("configRecord > configValue");
+				
+				foreach($dynamicXMLArray as $configValue){
+					// Figre out the fields
+					if(isset($dynamicFieldStructureArray[$configValue['index']]) && isset($configValue['value'])){
+						// We have a link and a valid record
+						$dynamicFieldStructureArray[$configValue['index']]['value'] = htmlspecialchars_decode($configValue['value']);
+					}
+				}
+			}
+			
+			return $dynamicFieldStructureArray;
+		}
+		
+		return NULL;
+	}
+	
+	public function getDynamicFields($text = 0){
+		$array = self::getDynamicFieldsArray((isset($this->recordInfo['dynamicFields']) ? $this->recordInfo['dynamicFields'] : NULL), self::getDynamicFieldsConfigString());
+		
+		if($text == 1){
+			$outputString = "";
+			if(isset($array) && count($array) > 0){
+				if(($dynamicFields = $array) != NULL){
+					foreach($dynamicFields as $field){
+						if(!isset($field['frontendDisplay']) || (isset($field['frontendDisplay']) && $field['frontendDisplay'] == 1)){
+							$value = (isset($field['value']) ? $field['value'] : "");
+							
+							if($field['type'] === "option"){
+								foreach($field['options'] as $optionKey => $optionValue){
+									if($field['value'] == $optionKey){
+										$value = $optionValue;
+									}
+								}
+							}
+							
+							$outputString .= "<h4>" . $field['name'] . "</h4>";
+							$outputString .= "<div>" . ($field['link'] != 0 ? "<a href=\"" . ($field['link'] == 2 ? "http://" . $value : ($field['link'] == 1 ? $value : "#")) . "\">" . $value . "</a>" : $value) . "</div>";
+						}
+					}
+				}
+			}
+			
+			return $outputString;
+		} elseif($text == 2){
+			return $array;
+		} else {
+			return (isset($this->recordInfo['dynamicFields']) ? $this->recordInfo['dynamicFields'] : NULL);
+		}
+	}
+	
+	/**
+	 * Returns the dynamic field.
+	 * If the index is equal to -1 then it returns all of the fields in an XML styled structure
+	 * otherwise it returnes the index
+	 */
+	public function getDynamicField($index){
+		if(isset($index)){
+			$array = self::getDynamicFieldsArray((isset($this->recordInfo['dynamicFields']) ? $this->recordInfo['dynamicFields'] : NULL), self::getDynamicFieldsConfigString());
+			
+			if(isset($array)){
+				foreach($array as $field){
+					if(isset($field['index']) && isset($index) && $field['index'] == $index){
+						if(isset($field['value'])){
+							return $field['value'];
+						}
+					}
+				}
+			}
+		}
+	
+		return "";
+	}
+	
+	/**
+	 * Sets the value for a dynamic field
+	 */
+	public function setDynamicField($index, $inputValue){
+		ImportClass("Xml.XMLHandler");
+	
+		if(isset($index) && isset($inputValue)){
+			$xmlHandler = new XMLHandler();
+			// Check to make sure configField is in the XML format
+			if(!isset($this->recordInfo['dynamicFields']) || $this->recordInfo['dynamicFields'] == ""){
+				// Since configField doesn't exist, create a basic structure
+				$this->recordInfo['dynamicFields'] = "<configRecord></configRecord>";
+			}
+				
+			// Take the configField and make it into an array
+			$xmlHandler->setXMLString($this->recordInfo['dynamicFields']);
+			
+			// Clean the inputValue
+			$scrubbedValue = htmlspecialchars($inputValue);
+			
+			// Check if the field exists
+			if($xmlHandler->nodeExists("configRecord > configValue > index", $index)){
+				// The node exists
+				// Lets update it
+				if($xmlHandler->updateNodeValue("configRecord > configValue", $index, $scrubbedValue) == false){
+					return false;
+				}
+			} else {
+				// Create a new config value
+				$xmlHandler->addChildNode("configRecord", "configValue");
+
+				// Add the index
+				$xmlHandler->addChildNode("configRecord > configValue", "index", $index);
+
+				// Add the value
+				$xmlHandler->addChildNode("configRecord > configValue", "value", $scrubbedValue);
+			}
+			
+			// Store it
+			$this->recordInfo['dynamicFields'] = $xmlHandler->getXMLString(FALSE);
+			
+			return true;
+		}
+
+		return false;
+	}
+	
+	/**
+	 * TODO: This function should be handled by the client and return the config header for the dynamic fields
+	 */
+	public function getDynamicFieldsConfigString(){
+		if(isset($this->dynamicFieldRecord) && is_array($this->dynamicFieldRecord)){
+			if(ConfigOption::exists($this->dynamicFieldRecord['component'], $this->dynamicFieldRecord['name'])){
+				$cfgOption = new ConfigOption(array("component" => $this->dynamicFieldRecord['component'], "name" => $this->dynamicFieldRecord['name']));
+				return $cfgOption->getValue();
+			}
+		}
+	}
+	
+	/**
+	 * This function handles the ajax/api searches for dynamic fields
+	 * TODO: Create the function
+	 */
+	public function searchDynamicFields(){
+		
+	}
+	
+	/**
+	 * 
+	 */
+	public function findReplaceEmailString($inputString, $findReplaceArray){
+		if(isset($inputString) && isset($findReplaceArray) && strlen($inputString) > 0 && is_array($findReplaceArray)){
+			foreach($findReplaceArray as $find => $replace){
+				$inputString = str_replace("[" . $find . "]", $replace, $inputString);
+			}
+		}
+		
+		return $inputString;
 	}
 }
 ?>

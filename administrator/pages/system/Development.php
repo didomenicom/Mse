@@ -1,26 +1,31 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
 switch(Url::getParts('act')){
-	case 'tasks':
-		ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/Tasks.php");
+	case 'ajaxHandler':
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/AjaxHandler.php");
 		Tasks();
 		break;
 	
-	case 'ajaxHandler':
-		ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/AjaxHandler.php");
+	case 'apiHandler':
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/ApiHandler.php");
 		Tasks();
 		break;
 	
 	case 'configGenerator':
 		ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/ConfigGenerator.php");
 		Tasks();
+		break;
+	
+	case 'help':
+		ImportFile(Url::getAdminDirBase() . DS . "pages/system/development/Help.php");
+		Help();
 		break;
 	
 	default:

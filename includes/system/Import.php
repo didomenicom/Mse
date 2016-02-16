@@ -1,15 +1,16 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
 /**
  * Imports files into the code. Similar to the PHP include_once or require_once
  */
+// TODO: Add logic for multiple upper characters in file path string... Ex: FolderName
 class Importer {
 	private static $imported = array();
 	
@@ -29,22 +30,84 @@ class Importer {
 				// File was in includes
 				return true;
 			} else {
-				Log::info("Importer: addClass -- file not found in includes - filename = '" . $path . "' class = '" . $className . "'");
-				
 				// Check if file is a system file in libraries/system
 				if(self::importFile(BASEPATH.LIBRARY.SYSTEM . "/" . $path) == true){
 					// File was in libraries/system
 					return true;
 				} else {
-					Log::info("Importer: addClass -- file not found in libraries/system - filename = '" . $path . "' class = '" . $className . "'");
-					
 					// Check if file is a system file in libraries/user
 					if(self::importFile(BASEPATH.LIBRARY.USER . "/" . $path) == true){
 						// File was in libraries/user
 						return true;
 					} else {
-						// File doesn't exist
-						Log::fatal("Importer: addClass -- file not found - filename = '" . $path . "' class = '" . $className . "'");
+						// The file doesn't exist as inputted... it could be case sensitive
+						$filePath = BASEPATH.INCLUDES;
+						foreach($classParts as $part){
+							if($directoryHandle = opendir($filePath)){
+								// Loop through all of the items
+								while(false !== ($directoryEntry = readdir($directoryHandle))){
+									if(strtolower($part) === strtolower($directoryEntry)){
+										$filePath = $filePath.DS . $directoryEntry;
+									}
+								}
+							} 
+						}       
+
+						if(file_exists($filePath.DS . $className . ".php")){
+							// Check if file is a system file in libraries/user
+							if(self::importFile($filePath.DS . $className . ".php") == true){
+								return true;
+							} else {
+								// File doesn't exist
+								Log::fatal("Importer: addClass -- file not found - filename = '" . $path . "' class = '" . $className . "'");
+							}
+						} else {
+							// The file doesn't exist as inputted... it could be case sensitive
+							$filePath = BASEPATH.LIBRARY.SYSTEM;
+							foreach($classParts as $part){
+								if($directoryHandle = opendir($filePath)){
+									// Loop through all of the items
+									while(false !== ($directoryEntry = readdir($directoryHandle))){
+										if(strtolower($part) === strtolower($directoryEntry)){
+											$filePath = $filePath.DS . $directoryEntry;
+										}
+									}
+								}
+							}
+
+							if(file_exists($filePath.DS . $className . ".php")){
+								// Check if file is a system file in libraries/user
+								if(self::importFile($filePath.DS . $className . ".php") == true){
+									return true;
+								} else {
+									// File doesn't exist
+									Log::fatal("Importer: addClass -- file not found - filename = '" . $path . "' class = '" . $className . "'"); 
+								}
+							} else {
+								// The file doesn't exist as inputted... it could be case sensitive
+								$filePath = BASEPATH.LIBRARY.USER;
+								foreach($classParts as $part){ 
+									if($directoryHandle = opendir($filePath)){
+										// Loop through all of the items
+										while(false !== ($directoryEntry = readdir($directoryHandle))){
+											if(strtolower($part) === strtolower($directoryEntry)){
+												$filePath = $filePath.DS . $directoryEntry;
+											}       
+										}
+									}       
+								}
+
+								if(file_exists($filePath.DS . $className . ".php")){
+									// Check if file is a system file in libraries/user
+									if(self::importFile($filePath.DS . $className . ".php") == true){
+										return true;
+									} else {
+										// File doesn't exist
+										Log::fatal("Importer: addClass -- file not found - filename = '" . $path . "' class = '" . $className . "'");
+									}       
+								}
+							}
+						}
 					}
 				}
 			}
@@ -108,11 +171,8 @@ class Importer {
 					include_once(self::$imported[$index]);
 					
 					return true;
-				} else {
-					Log::warn("Importer: importFile -- file doesn't exist - file = '" . $path . "'");
 				}
 			} else {
-				Log::warn("Importer: importFile -- already exists - file = '" . $path . "'");
 				return true;
 			}
 		}

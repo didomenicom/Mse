@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -59,7 +59,7 @@ class Define {
 			if(($index = self::search($name)) != -1){
 				return self::$definedVars[$index]['value'];
 			} else {
-				Log::warn("Define: get -- defined not found - name = '" . $name . "'");
+//				Log::warn("Define: get -- defined not found - name = '" . $name . "'");
 			}
 		} else {
 			Log::warn("Define: get -- not set - name = '" . $name . "'");
@@ -77,7 +77,7 @@ class Define {
 				unset(self::$definedVars[$index]);
 				return true;
 			} else {
-				Log::warn("Define: delete -- defined not found - name = '" . $name . "'");
+//				Log::warn("Define: delete -- defined not found - name = '" . $name . "'");
 			}
 		} else {
 			Log::warn("Define: delete -- not sent - name = '" . $name . "'");

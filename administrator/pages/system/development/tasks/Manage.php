@@ -1,6 +1,6 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
  * @copyright 2008 - 2013 Mike Di Domenico
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
@@ -17,32 +17,24 @@ function Manage(){
 		
 		// Figure out the actions
 		?>
-		<div class="btn-toolbar pull-right" style="margin-top: 0px;">
+		<div class="buttonMenu toolbar pull-right">
 			<div class="btn-group">
-				<a class="btn" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=add"><i class="icon-plus"></i></a>
-				<a class="btn" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=help"><i class="icon-question-sign"></i></a>
-				<a class="btn" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&tas=view"><i class="icon-eye-open"></i></a>
+				<a class="btn btn-sm btn-default" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=add"><i class="fa fa-plus"></i></a>
+				<a class="btn btn-sm btn-default" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=help&com=development"><i class="fa fa-question-circle"></i></a>
 			</div>
 		</div>
 		<?php
 		
 		// Create the class
-		$filter['completed'] = false;
+		$filter['verified'] = false;
 		$items = new Tasks($filter);
 		
 		?>
 		<form name="adminForm" method="post" action="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=manage">
-			<table align="center" cellpadding="0" cellspacing="0" border="0" width="550">
-				<tr>
-					<td>&nbsp;
-						
-					</td>
-				</tr>
-			</table>
 			<?php
 			if($items->rowsExist()){
 			?>
-				<table class="table table-bordered table-striped table-hover">
+				<table class="table table-bordered table-striped table-hover table-condensed table-responsive">
 					<thead>
 						<tr>
 							<th width="5%">
@@ -64,15 +56,25 @@ function Manage(){
 				while($items->hasNext()){
 					$row = $items->getNext();
 					?>
-					<tr>
+					<tr<?php echo ($row->getCompleted() == true && $row->getVerifyBy() == UserFunctions::getLoggedIn()->getId() ? " class=\"error\"" : ""); ?>>
 						<td>
 							<ul class="nav" style="margin-top: 0px; margin-bottom: 0px;">
 								<li class="dropdown">
 									<a href="#" class="dropdown-toggle" data-toggle="dropdown" style="margin-top: 0px; margin-bottom: 0px;"><?php echo $cnt; ?></a>
 									<ul class="dropdown-menu">
-										<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=complete&id=<?php echo $row->getId(); ?>">Complete</a></li>
-										<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=edit&id=<?php echo $row->getId(); ?>">Edit</a></li>
-										<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=delete&id=<?php echo $row->getId(); ?>">Delete</a></li>
+										<?php 
+										if($row->getCompleted() == true){
+										?>
+										<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=verify&id=<?php echo $row->getId(); ?>"><i class="glyphicon glyphicon-ok"></i> Verify</a></li>
+										<?php 
+										} else {
+										?>
+										<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=complete&id=<?php echo $row->getId(); ?>"><i class="glyphicon glyphicon-ok"></i> Complete</a></li>
+										<?php 
+										}
+										?>
+										<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=edit&id=<?php echo $row->getId(); ?>"><i class="glyphicon glyphicon-pencil"></i> Edit</a></li>
+										<li><a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=delete&id=<?php echo $row->getId(); ?>"><i class="glyphicon glyphicon-trash"></i> Delete</a></li>
 									</ul>
 								</li>
 							</ul>
@@ -103,7 +105,7 @@ function Manage(){
 		<?php
 	} else {
 		Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
-		Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+		Url::redirect(Url::home(), 3, false);
 	}
 }
 

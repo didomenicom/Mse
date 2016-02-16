@@ -1,16 +1,17 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
 function Manage(){
-	if(UserFunctions::getLoggedIn() != NULL && true == true){ // TODO: Add permission check
+	if(UserFunctions::hasComponentAccess("users", "manage") == true){
 		// Grab the class to walk through the DB
 		ImportClass("User.Users");
+		ImportClass("Ajax.Ajax");
 		
 		// Display the page text
 		echo Text::pageTitle("Manage Users");
@@ -32,13 +33,12 @@ function Manage(){
 		</div>
 		<?php
 		// Setup the filters
+		$filter['hasAccess'] = true;
 		$filter['deleted'] = $viewDeleted;
 		$filter['permissionGroup'] = (Session::get('filter_userPermissionGroup') != NULL ? Session::get('filter_userPermissionGroup') : NULL);
 		
-		$userSortBy = UserFunctions::getLoggedIn()->getSetting("sort.by.users"); 
-		$userSortDirection = UserFunctions::getLoggedIn()->getSetting("sort.direction.users");
-		$sort['by'] = ($userSortBy != NULL ? $userSortBy : "name");
-		$sort['direction'] = ($userSortDirection != NULL ? $userSortDirection : "ASC");
+		$sort['by'] = "name";
+		$sort['direction'] = "ASC";
 		
 		// Create the class
 		$items = new Users($filter, $sort);
@@ -55,7 +55,10 @@ function Manage(){
 					url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
 					async: true,
 					timeout: 50000,
-					data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateUserList", val: selectVal, deleted: <?php echo ($viewDeleted == true ? 1 : 0); ?>},
+					data: {id: "<?php echo Ajax::generateHandlerId("Manage Users Permission Group Dropdown"); ?>", 
+						task: "updateUserList", 
+						val: selectVal, 
+						deleted: <?php echo ($viewDeleted == true ? 1 : 0); ?>},
 					success: function(data){
 						updateRows(data);
 					}
@@ -71,7 +74,10 @@ function Manage(){
 						url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
 						async: true,
 						timeout: 50000,
-						data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateSearch", val: searchStr, deleted: <?php echo ($viewDeleted == true ? 1 : 0); ?>},
+						data: {id: "<?php echo Ajax::generateHandlerId("Manage Users Permission Group Dropdown"); ?>", 
+							task: "updateSearch", 
+							val: searchStr, 
+							deleted: <?php echo ($viewDeleted == true ? 1 : 0); ?>},
 						success: function(data){
 							updateRows(data);
 						}
@@ -82,14 +88,17 @@ function Manage(){
 						url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
 						async: true,
 						timeout: 50000,
-						data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "updateUserList", val: 0, deleted: <?php echo ($viewDeleted == true ? 1 : 0); ?>},
+						data: {id: "<?php echo Ajax::generateHandlerId("Manage Users Permission Group Dropdown"); ?>", 
+							task: "updateUserList", 
+							val: 0, 
+							deleted: <?php echo ($viewDeleted == true ? 1 : 0); ?>},
 						success: function(data){
 							updateRows(data);
 						}
 					});
 				}
 			});
-			
+
 			$(".sort").click(function(e){
 				var str = $(this).attr("id");
 				
@@ -99,7 +108,9 @@ function Manage(){
 						url: "<?php echo Url::getAdminHttpBase(); ?>/index.php?ajaxRequest=1",
 						async: true,
 						timeout: 50000,
-						data: {id: "wGmCO63M4HQZbeNmeW1mO1IKvpxq0QN8vRsoNXV1+2k=", task: "sort", val: str},
+						data: {id: "<?php echo Ajax::generateHandlerId("Manage Users Permission Group Dropdown"); ?>", 
+							task: "sort", 
+							val: str},
 						success: function(data){
 							if(data == 1){
 								// Save off search query 
@@ -113,21 +124,21 @@ function Manage(){
 					});
 				}
 			});
-			
+
 			function updateRows(data){
 				if(data == 0){
 					$("#manageTable tbody").html("");
 				}
-				
+
 				if(data != "" && data != 0){
 					$("#manageTable tbody").html(data);
 				}
-				
+
 				// Handle the footer 
 				var totalRowCount = (data != "" && data != 0 ? $('#manageTable tbody tr').length : 0);
-				
+
 				$("#tableFooterRowCount").html((totalRowCount > 0 ? "1" : "0") + " - " + totalRowCount + " of " + totalRowCount + " records");
-		    }
+			}
 		});
 		</script>
 		<form name="adminForm" method="post" action="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=users&act=manage">
@@ -147,7 +158,8 @@ function Manage(){
 									<option value="0"<?php echo (Session::get('filter_userPermissionGroup') == NULL ? "selected=\"selected\"" : "")?>>- Permission Group -</option>
 									<?php
 									ImportClass("Group.Groups");
-									$permissionGroups = new Groups();
+									$filter['hasAccess'] = true;
+									$permissionGroups = new Groups(array("hasAccess" => true));
 									
 									if($permissionGroups->rowsExist()){
 										while($permissionGroups->hasNext()){
@@ -167,22 +179,22 @@ function Manage(){
 							
 						</th>
 						<th width="18%">
-							<a href="#" id="sort_name" class="sort"><?php echo Text::sortHeader("Name", "name", $sort); ?></a>
+							Name
 						</th>
 						<th width="18%">
-							<a href="#" id="sort_username" class="sort"><?php echo Text::sortHeader("Username", "username", $sort); ?></a>
+							Username
 						</th>
 						<th width="18%">
-							<a href="#" id="sort_email" class="sort"><?php echo Text::sortHeader("Email Address", "email", $sort); ?></a>
+							Email Address
 						</th>
 						<th width="18%">
-							<a href="#" id="sort_permissionGroup" class="sort"><?php echo Text::sortHeader("Permission Group", "permissionGroup", $sort); ?></a>
+							Permission Group
 						</th>
 						<th width="18%">
-							<a href="#" id="sort_lastLogin" class="sort"><?php echo Text::sortHeader("Last Login", "lastLogin", $sort); ?></a>
+							Last Login
 						</th>
 						<th width="5%">
-							<a href="#" id="sort_id" class="sort"><?php echo Text::sortHeader("ID", "id", $sort); ?></a>
+							ID
 						</th>
 					</tr>
 				</thead>
@@ -281,7 +293,7 @@ function Manage(){
 		<?php
 	} else {
 		Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
-		Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+		Url::redirect(Url::home(), 3, false);
 	}
 }
 

@@ -1,14 +1,14 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
 function Manage(){
-	if(UserFunctions::getLoggedIn() != NULL && true == true){
+	if(UserFunctions::hasComponentAccess("groups", "manage") == true){
 		// Grab the class to walk through the DB
 		ImportClass("Group.Groups");
 		
@@ -21,7 +21,6 @@ function Manage(){
 			<div class="btn-group">
 				<a class="btn" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=groups&act=add"><i class="icon-plus"></i></a>
 				<a class="btn" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=groups&act=help"><i class="icon-question-sign"></i></a>
-				<a class="btn" href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=groups&act=view"><i class="icon-eye-open"></i></a>
 			</div>
 		</div>
 		<?php
@@ -107,7 +106,7 @@ function Manage(){
 		<?php
 	} else {
 		Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
-		Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+		Url::redirect(Url::home(), 3, false);
 	}
 }
 

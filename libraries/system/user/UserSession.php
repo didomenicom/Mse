@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -29,7 +29,9 @@ class UserSession {
 		if(isset($sessionId)){
 			// A session might exist, check the db
 			$this->sessionId = Encryption::decrypt($sessionId);
-			self::buildData();
+			if(self::buildData() == NULL){
+				return NULL;
+			}
 		} else {
 			// Session doesn't exist, create a new one
 			if(self::generateSessionId() == false){
@@ -74,12 +76,17 @@ class UserSession {
 			
 			$info = $db->fetchAssoc("SELECT * FROM sessions WHERE id='" . $this->sessionId . "'");
 			
-			$this->recordInfo['userId'] = $info->userId;
-			$this->recordInfo['createTimeStamp'] = $info->createTimeStamp;
-			$this->recordInfo['removeTimeStamp'] = $info->removeTimeStamp;
-			$this->recordInfo['ipAddress'] = $info->ipAddress;
-			$this->recordInfo['browser'] = $info->browser;
-			$this->recordInfo['reserved'] = $info->reserved;
+			if(isset($info->userId)){
+				$this->recordInfo['userId'] = $info->userId;
+				$this->recordInfo['createTimeStamp'] = $info->createTimeStamp;
+				$this->recordInfo['removeTimeStamp'] = $info->removeTimeStamp;
+				$this->recordInfo['ipAddress'] = $info->ipAddress;
+				$this->recordInfo['browser'] = $info->browser;
+				$this->recordInfo['reserved'] = $info->reserved;
+			} else {
+				// TODO: Record doesn't exist
+				throw new MseException("Record doesn't exist");
+			}
 		}
 	}
 	

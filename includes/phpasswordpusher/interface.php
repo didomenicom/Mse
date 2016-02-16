@@ -3,7 +3,7 @@
 /**
  * User Interface Functions
  *
- * @license http://www.gnu.org/licenses/gpl-3.0.html GPLv3
+ * @license https://opensource.org/licenses/MIT
  */
 
 /**

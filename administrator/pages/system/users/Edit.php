@@ -1,14 +1,14 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
 function Edit(){
-	if(UserFunctions::getLoggedIn() != NULL && true == true){
+	if(UserFunctions::hasComponentAccess("users", "edit") == true){
 		ImportClass("Group.Groups");
 		ImportClass("User.User");
 		
@@ -89,7 +89,7 @@ function Edit(){
 						<select name="inputPermissionGroup" id="inputPermissionGroup">
 							<?php
 							// List all of the groups
-							$groups = new Groups();
+							$groups = new Groups(array("hasAccess" => true));
 							while($groups->hasNext() == true){
 								$row = $groups->getNext();
 								?>
@@ -180,7 +180,7 @@ function Edit(){
 		}
 	} else {
 		Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
-		Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+		Url::redirect(Url::home(), 3, false);
 	}
 }
 

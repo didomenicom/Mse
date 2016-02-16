@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -41,22 +41,39 @@ class Ajax {
 					$functionName = $ajaxHandler->getCallerFunction();
 					$path = $ajaxHandler->getClassName();
 					
+					// Check to make sure there is no spaces, tabs, line breaks, etc (this shouldn't happen to begin with)
+					// TODO: Add code so we don't hit this
+					if(substr_count($path, " ") > 0){
+						// Just die now... we won't succeed in loading the file... 
+						return false;
+					}
+					
 					// Break it apart
 					$parts = explode("/", $path);
+					$fileName = array_pop($parts);
 					
-					// Check if it is in valid format
 					if(count($parts) > 0){
-						$filename = array_pop($parts);
-						
-						// Check if the first part is "system"... system directory compared to the user directory
-						$filePath = (strtolower(array_shift($parts)) === "system" ? "system".DS : "user".DS) . "ajax".DS;
-						
-						foreach($parts as $part){
-							$filePath .= strtolower($part).DS;
+						$filePath;
+						if(strtolower($parts[0]) === "user"){
+							$filePath = BASEPATH.LIBRARY.USER . "/ajax";
+						}
+
+						if(strtolower($parts[0]) === "system"){
+							$filePath = BASEPATH.LIBRARY.SYSTEM . "/ajax";
 						}
 						
-						// Build path 
-						if(ImportFile(BASEPATH.DS.LIBRARY.DS . $filePath . $filename . ".php") == true){
+						foreach($parts as $part){
+							if($directoryHandle = opendir($filePath)){
+								// Loop through all of the items
+								while(false !== ($directoryEntry = readdir($directoryHandle))){
+									if(strtolower($part) === strtolower($directoryEntry)){
+										$filePath = $filePath.DS . $directoryEntry;
+									}
+								}
+							}
+						}
+
+						if(ImportFile($filePath.DS . $fileName . ".php") == true){
 							// Found and grabbed the file
 							// Execute it
 							return $functionName($_POST["task"]);
@@ -64,6 +81,7 @@ class Ajax {
 					}
 				}
 			}
+			
 		}
 		
 		return false;
@@ -76,7 +94,7 @@ class Ajax {
 			// Check if handler id the exists
 			$parts = $db->fetchAssoc("SELECT id FROM ajaxHandler WHERE handlerId='" . $handlerId . "'");
 			
-			if($parts->id > 0){
+			if(isset($parts->id) && $parts->id > 0){
 				$rowId = $parts->id;
 				
 				return true;
@@ -84,6 +102,35 @@ class Ajax {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * 
+	 */
+	public static function generateHandlerId($inputHandlerName){
+		global $db; 
+		
+		if($inputHandlerName != null && strlen($inputHandlerName) > 0){
+			$rowsCount = $db->fetchObject("SELECT handlerId FROM ajaxHandler WHERE name='" . $inputHandlerName . "'");
+			
+			if($rowsCount > 0){
+				if($rowsCount > 1){
+					// This is a problem...
+					Log::error("Ajax.generateHandlerId('" . $inputHandlerName . "') count is greater than 1");
+				}
+				
+				while($db->fetchObjectHasNext() == true){
+					$row = $db->fetchObjectGetNext();
+					
+					if(isset($row->handlerId)){
+						return Encryption::encrypt($row->handlerId);
+					}
+				}
+				$db->fetchObjectDestroy();
+			}
+		}
+		
+		return "";
 	}
 }
 ?>

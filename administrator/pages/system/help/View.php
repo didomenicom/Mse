@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2013 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -11,7 +11,7 @@ defined("Access") or die("Direct Access Not Allowed");
  * TODO: Add a Wiki style table of contents for large documentation files
  */
 function View(){
-	if(UserFunctions::getLoggedIn() != NULL && true == true){
+	if(UserFunctions::hasComponentAccess("help", "view") == true){
 		$com = (Url::getParts('com') !== "" ? Url::getParts('com') : NULL);
 		$para = (Url::getParts('para') !== "" ? Url::getParts('para') : NULL);
 		
@@ -32,7 +32,7 @@ function View(){
 			$helps = new Helps($filter);
 			
 			// Display the page text
-			echo Text::pageTitle($component->getName(1) . " Help");
+			echo Text::pageTitle($component->getDisplayName(1) . " Help");
 			?>
 			<script type="text/javascript">
 			function back(){
@@ -83,7 +83,7 @@ function View(){
 		}
 	} else {
 		Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
-		Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+		Url::redirect(Url::home(), 3, false);
 	}
 }
 

@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -267,8 +267,30 @@ class Mailer extends PHPMailer {
 	
 	public function setReplyTo($inputEmail, $inputName){
 		if(isset($inputEmail) && isset($inputName)){
-			parent::AddReplyTo($inputEmail, $inputName);		
+			parent::AddReplyTo($inputEmail, $inputName);
 		}
+	}
+	
+	public function ClearAllRecipients(){
+		parent::ClearAllRecipients();
+		$this->toAddress = array();
+		$this->ccAddress = array();
+		$this->bccAddress = array();
+	}
+	
+	public function ClearAddresses(){
+		parent::ClearAddresses();
+		$this->toAddress = array();
+	}
+	
+	public function ClearCCs(){
+		parent::ClearCCs();
+		$this->ccAddress = array();
+	}
+	
+	public function ClearBCCs(){
+		parent::ClearBCCs();
+		$this->bccAddress = array();
 	}
 }
 

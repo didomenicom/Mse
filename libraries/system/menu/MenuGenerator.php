@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -75,9 +75,17 @@ class MenuGenerator {
 				echo ($inline == false ? "<li class=\"dropdown" . ($subMenuParentCount >= 1 ? "-submenu" : "") . "\">" :  "<li>");
 				
 				// Display the current menu
-				?>
+				if($info->internal == 1){
+					?>
 				<a href="<?php echo $urlBase . DS . ($info->url !== "" ? $info->url : Url::getCurrentHttp() . "#"); ?>" data-target="<?php echo $urlBase; ?>" class="dropdown-toggle" data-toggle="dropdown"><?php echo stripslashes($info->name); ?></a>
-				<?php
+					<?php
+				} else {
+					$httpExists = (substr_count($info->url, "http") > 0 ? true : false);
+					?>
+				<li><a href="<?php echo ($info->url !== "" ? ($httpExists == false ? "http://" : "") . $info->url : $urlBase . DS . Url::getCurrentHttp() . "#"); ?>" data-target="<?php echo $urlBase; ?>" class="dropdown-toggle" data-toggle="dropdown"><?php echo stripslashes($info->name); ?></a></li>
+					<?php
+				}
+				
 				
 				if($inline == false){
 					echo "<ul class=\"dropdown-menu\">";
@@ -100,9 +108,16 @@ class MenuGenerator {
 				echo ($inline == false ? "</ul></li>" : "</li>");
 			} else {
 				// No children print the current menu and we are done
-				?>
+				if($info->internal == 1){
+					?>
 				<li><a href="<?php echo $urlBase . DS . ($info->url !== "" ? $info->url : Url::getCurrentHttp() . "#"); ?>" data-target="<?php echo $urlBase; ?>"><?php echo stripslashes($info->name); ?></a></li>
-				<?php
+					<?php
+				} else {
+					$httpExists = (substr_count($info->url, "http") > 0 ? true : false);
+					?>
+				<li><a href="<?php echo ($info->url !== "" ? ($httpExists == false ? "http://" : "") . $info->url : $urlBase . DS . Url::getCurrentHttp() . "#"); ?>" data-target="<?php echo $urlBase; ?>"><?php echo stripslashes($info->name); ?></a></li>
+					<?php
+				}
 			}
 		}
 	}

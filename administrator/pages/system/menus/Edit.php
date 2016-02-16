@@ -1,14 +1,14 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
 function Edit(){
-	if(UserFunctions::getLoggedIn() != NULL && true == true){
+	if(UserFunctions::hasComponentAccess("menus", "edit") == true){
 		ImportClass("Group.Groups");
 		ImportClass("Menu.Menus");
 		ImportClass("Menu.MenuPositions");
@@ -28,6 +28,11 @@ function Edit(){
 			function checkForm(){
 				if($("#inputName").val() == ""){
 					$("#formMessages").html("You need to enter a name").removeClass("hidden");
+					return false;
+				}
+				
+				if($("#inputPermissionGroup :selected").length == 0){
+					$("#formMessages").html("You need to select a permission group").removeClass("hidden");
 					return false;
 				}
 				
@@ -87,14 +92,18 @@ function Edit(){
 				<div class="control-group">
 					<label class="control-label" for="inputPermissionGroup">Permission Group</label>
 					<div class="controls">
-						<select name="inputPermissionGroup" id="inputPermissionGroup">
+						<?php 
+						$permissionGroupParts = explode("|", ($id > 0 ? $data->getPermissionGroup() : ""));
+						?>
+						<select name="inputPermissionGroup[]" id="inputPermissionGroup" multiple="multiple">
+							<option value="-1"<?php echo ($id > 0 && in_array("-1", $permissionGroupParts) == true ? "selected=\"selected\"" : ""); ?>>Guest</option>
 							<?php
 							// List all of the groups
-							$groups = new Groups();
+							$groups = new Groups(array("hasAccess" => true));
 							while($groups->hasNext() == true){
 								$row = $groups->getNext();
 								?>
-							<option value="<?php echo $row->getId(); ?>"<?php echo ($id > 0 && $data->getPermissionGroup() == $row->getId() ? "selected=\"selected\"" : ""); ?>><?php echo $row->getName(1); ?></option>
+							<option value="<?php echo $row->getId(); ?>"<?php echo ($id > 0 && in_array($row->getId(), $permissionGroupParts) == true ? "selected=\"selected\"" : ""); ?>><?php echo $row->getName(1); ?></option>
 								<?php
 							}
 							?>
@@ -111,8 +120,8 @@ function Edit(){
 					<label class="control-label" for="inputInternal">Internal</label>
 					<div class="controls">
 						<select name="inputInternal" id="inputInternal">
-							<option value="0"<?php echo ($id > 0 ? ($data->getInternal() == 0 ? "selected=\"selected\"" : "") : "selected=\"selected\""); ?>>No</option>
-							<option value="1"<?php echo ($id > 0 && $data->getInternal() == 1 ? "selected=\"selected\"" : ""); ?>>Yes</option>
+							<option value="1"<?php echo ($id > 0 && $data->getInternal() == 1 ? "selected=\"selected\"" : "selected=\"selected\""); ?>>Yes</option>
+							<option value="0"<?php echo ($id > 0 ? ($data->getInternal() == 0 ? "selected=\"selected\"" : "") : ""); ?>>No</option>
 						</select>
 					</div>
 				</div>
@@ -149,7 +158,7 @@ function Edit(){
 				$data->setParent($info['inputParent']);
 				$data->setPosition($info['inputPosition']);
 				$data->setOrdering($info['inputOrdering']);
-				$data->setPermissionGroup($info['inputPermissionGroup']);
+				$data->setPermissionGroup((isset($info['inputPermissionGroup']) ? $info['inputPermissionGroup'] : NULL));
 				$data->setInternal($info['inputInternal']);
 				$data->setUrl($info['inputUrl']);
 				
@@ -169,7 +178,7 @@ function Edit(){
 		}
 	} else {
 		Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
-		Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+		Url::redirect(Url::home(), 3, false);
 	}
 }
 

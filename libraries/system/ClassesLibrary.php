@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -40,19 +40,34 @@ class ClassesLibrary {
 				}
 			}
 			
-			// Cheick if there are items -- if so add the WHERE clause
+			// Check if there are items -- if so add the WHERE clause
 			$outputString = ($itemsExist == true ? " WHERE " . $outputString : $outputString);
 			
 			return $outputString;
 		}
 	}
 	
-	public static function generateSortingString(){
-		
+	/**
+	 * Generates a filter string for sorting the results
+	 * Passes in the sortBy, the sortDirection
+	 * Returns sort string
+	 */
+	public static function generateSortingString($sort = array()){
+		if(isset($sort['by']) && isset($sort['direction']) && strlen($sort['by']) > 0 && (strtoupper($sort['direction']) === "ASC" || strtoupper($sort['direction']) === "DESC")){
+			return " ORDER BY " . $sort['by'] . " " . strtoupper($sort['direction']);
+		}
 	}
 	
-	public static function generateRowsCountString(){
-		
+	/**
+	 * This generates the LIMIT <start>, <offset>
+	 * The input should be an array looking like:
+	 * $countArray['count'] = 1;
+	 * $countArray['offset'] = 0;
+	 */
+	public static function generateRowsCountString($countArray = array()){
+		if(isset($countArray['count']) && isset($countArray['offset'])){
+			return " LIMIT " . $countArray['offset'] . "," . $countArray['count'];
+		}
 	}
 }
 ?>

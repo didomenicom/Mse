@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -15,32 +15,63 @@ class UserFunctions {
 	private static $userInfo = NULL;
 	
 	/**
+	 * Returns the user id if one exists, otherwise NULL
+	 */
+	public static function getUserId(){
+		global $Config;
+	
+		// Check if a session exists
+		if(Cookie::exists($Config->getSystemVar('cookieName')) == true){
+			// Import the classes manually so the logs work
+			require_once BASEPATH.LIBRARY.SYSTEM . "/user/UserSession.php";
+			
+			// 1. Find the cookie
+			$sessionId = Cookie::get($Config->getSystemVar('cookieName'));
+			
+			try {
+				// 2. Create the UserSession
+				$userSession = new UserSession($sessionId);
+				
+				// 3. Return the user id
+				return $userSession->getUserId();
+			} catch (MseException $e){
+				// Destroy the cookie
+				Cookie::delete($Config->getSystemVar('cookieName'));
+				
+				// Success
+				Url::redirect((Define::get('baseSystem') == 1 ? Url::getAdminHttpBase() : Url::getHttpBase()), 0, false);
+			}
+		}
+	
+		if(UserFunctions::$userInfo != NULL){
+			return UserFunctions::$userInfo;
+		}
+	
+		return NULL;
+	}
+	
+	/**
 	 * Returns a User structure if a user is logged in, otherwise NULL
 	 */
 	public static function getLoggedIn(){
 		global $Config;
 		
-		
 		if(UserFunctions::$userInfo == NULL){
-			
 			// Check if a session exists
 			if(Cookie::exists($Config->getSystemVar('cookieName')) == true){
-				ImportClass("User.UserSession");
+				ImportClass("User.User");
+				// Get the user id
+				$userId = self::getUserId();
 				
-				// 1. Find the cookie
-				$sessionId = Cookie::get($Config->getSystemVar('cookieName'));
+				// Create the user
+				UserFunctions::$userInfo = new User($userId);
 				
-				try {
-					// 2. Create the UserSession
-					$userSession = new UserSession($sessionId);
+				// Check to make sure this user is not deleted
+				if(UserFunctions::$userInfo->getDeleted() != 0){
+					UserFunctions::$userInfo = NULL;
 					
-					// 3. Create the user
-					ImportClass("User.User");
-						
-					UserFunctions::$userInfo = new User($userSession->getUserId());
-				} catch (MseException $e) {
-					// TODO: Remove the cookie
-					
+					// Destroy the cookie
+					Cookie::delete($Config->getSystemVar('cookieName'));
 				}
 			}
 		}
@@ -50,6 +81,25 @@ class UserFunctions {
 		}
 		
 		return NULL;
+	}
+	
+	/**
+	 * This function finds out if the user has access to the component. 
+	 * It also checks to see if the user is logged in
+	 */
+	public static function hasComponentAccess($component, $function){
+		if(strlen($component) > 0 && strlen($function) > 0){
+			// Find out if the user is logged in
+			if(($user = UserFunctions::getLoggedIn()) != null){
+				// Get the users permission group
+				$permissionGroup = $user->getPermissionGroup(2);
+				
+				// Find out if there is access
+				return $permissionGroup->getComponentFunction($component, $function);
+			}
+		}
+		
+		return false;
 	}
 	
 	/** 

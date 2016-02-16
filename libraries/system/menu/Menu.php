@@ -1,14 +1,11 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
-
-ImportClass("Library");
-Log::setDisplayErrorPage(true);
 
 class Menu extends Library {
 	protected $recordInfo = array('id' => 0);
@@ -21,18 +18,18 @@ class Menu extends Library {
 		}
 	}
 	
-	public function setId($inputId, $buildData = 0){
-		if($inputId > 0){
-			$this->recordInfo['id'] = $inputId;
+	public function setId($inputId, $buildData = true){
+		if(is_numeric($inputId) && intval($inputId) > 0){
+			$this->recordInfo['id'] = intval($inputId);
 			
-			if($buildData == 0){
-				self::buildData();
+			if($buildData == true){
+				return self::buildData();
 			}
 			
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
 	public function getId(){
@@ -92,10 +89,10 @@ class Menu extends Library {
 	public function setParent($inputValue){
 		if(isset($inputValue)){
 			$this->recordInfo['parent'] = $inputValue;
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
 	public function getName($text = 0){
@@ -109,10 +106,10 @@ class Menu extends Library {
 	public function setName($inputValue){
 		if(isset($inputValue)){
 			$this->recordInfo['name'] = $inputValue;
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
 	public function getPosition($text = 0){
@@ -128,10 +125,10 @@ class Menu extends Library {
 	public function setPosition($inputValue){
 		if(isset($inputValue)){
 			$this->recordInfo['position'] = $inputValue;
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
 	public function getOrdering($text = 0){
@@ -145,10 +142,10 @@ class Menu extends Library {
 	public function setOrdering($inputValue){
 		if(isset($inputValue)){
 			$this->recordInfo['ordering'] = $inputValue;
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
 	public function getInternal($text = 0){
@@ -162,10 +159,10 @@ class Menu extends Library {
 	public function setInternal($inputValue){
 		if(isset($inputValue)){
 			$this->recordInfo['internal'] = $inputValue;
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
 	public function getUrl($text = 0){
@@ -179,42 +176,74 @@ class Menu extends Library {
 	public function setUrl($inputValue){
 		if(isset($inputValue)){
 			$this->recordInfo['url'] = $inputValue;
-			return 1;
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
-	public function getPermissionGroup($text = 0){
+	public function getPermissionGroup($text = 0, $indx = -1){
 		if($text == 1){
-			if(self::getPermissionGroup() > 0){
-				ImportClass("Group.Group");
-				$permissionGroup = new Group(self::getPermissionGroup());
-				return $permissionGroup->getName(1);
+			if($indx != -1){
+				$parts = explode("|", $this->recordInfo['permissionGroup']);
+				for($i = 0; $i < count($parts); $i++){
+					if($parts[$i] > 0){
+						ImportClass("Group.Group");
+						$permissionGroup = new Group($parts[$i]);
+						return $permissionGroup->getName(1);
+					} elseif(self::getPermissionGroup() == -1){
+						return "Guest";
+					}
+				}
+			} else {
+				$output = "";
+				$parts = explode("|", $this->recordInfo['permissionGroup']);
+				for($i = 0; $i < count($parts); $i++){
+					if($parts[$i] > 0){
+						ImportClass("Group.Group");
+						$permissionGroup = new Group($parts[$i]);
+						$output .= $permissionGroup->getName(1) . ", ";
+					} elseif(self::getPermissionGroup() == -1){
+						$output .= "Guest, ";
+					}
+				}
+				
+				$output = self::trimEndOfString($output, ", ");
+				
+				return $output;
 			}
 		} else {
-			return $this->recordInfo['permissionGroup'];
+			if($indx != -1){
+				$parts = explode("|", $this->recordInfo['permissionGroup']);
+				for($i = 0; $i < count($parts); $i++){
+					if($i == $indx){
+						return $parts[$i];
+					}
+				}
+				
+				return NULL;
+			} else {
+				return $this->recordInfo['permissionGroup'];
+			}
 		}
 	}
 	
-	public function setPermissionGroup($inputValue){
+	public function setPermissionGroup($inputValue, $indx = -1){
 		if(isset($inputValue)){
-			$this->recordInfo['permissionGroup'] = $inputValue;
-			return 1;
+			$this->recordInfo['permissionGroup'] = implode("|", $inputValue);
+			return true;
 		}
 		
-		return 0;
+		return false;
 	}
 	
-
-
 	public function canDelete(){
 		global $db;
 		
 		$check = $db->fetchObject("SELECT * FROM menu WHERE parent=" . self::getId());
 		$db->fetchObjectDestroy();
 		
-		return ($check > 0 ? false : true);
+		return ($check == 0 ? true : false);
 	}
 	
 	public function delete(){
@@ -256,6 +285,7 @@ class Menu extends Library {
 				"'" . addslashes(self::getUrl()) . "')");
 				
 			if($result == true){
+				self::setId($db->getLastInsertId());
 				Log::action("Menu (" . self::getId() . ") added");
 			}
 		}

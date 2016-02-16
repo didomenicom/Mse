@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -11,7 +11,7 @@ defined("Access") or die("Direct Access Not Allowed");
  * TODO: Move to a global class like help
  */
 function Details(){
-	if(UserFunctions::getLoggedIn() != NULL && true == true){ // TODO: Add permission check
+	if(UserFunctions::hasComponentAccess("users", "details") == true){
 		ImportClass("User.User");
 		
 		$result = (Url::getParts('result') != NULL ? Url::getParts('result') : 0);
@@ -42,12 +42,12 @@ function Details(){
 			</div>
 			<?php
 		} else {
-			Messages::setMessage("An unknown error has occured", Define::get("MessageLevelError"));
+			Messages::setMessage("An unknown error has occurred", Define::get("MessageLevelError"));
 			Url::redirect(Url::getAdminHttpBase() . "/index.php?option=user&act=manage", 0, false);
 		}
 	} else {
 		Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
-		Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+		Url::redirect(Url::home(), 3, false);
 	}
 }
 

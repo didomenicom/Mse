@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -19,18 +19,47 @@ class Mysql {
 		$this->db = getInstanceOf('Db');
 	}
 	
-	public function Mysql(){
+	public function Mysql($connectionInfo = null){
 		global $Config;
 		
-		/* Connection Informaion */
-		$db_host      = $Config->getSystemVar('database_Host');
-		$db_user      = $Config->getSystemVar('database_User');
-		$db_name      = $Config->getSystemVar('database_Name');
-		$db_pass      = $Config->getSystemVar('database_Pass');
+		/* Connection Information */
+		$db_host = "";
+		$db_name = "";
+		$db_user = "";
+		$db_pass = "";
+		
+		if($connectionInfo != null){
+			$db_host = $connectionInfo['host'];
+			$db_name = $connectionInfo['name'];
+			$db_user = $connectionInfo['user'];
+			$db_pass = $connectionInfo['password'];
+		} else {
+			$db_host = $Config->getSystemVar('database_Host');
+			$db_name = $Config->getSystemVar('database_Name');
+			$db_user = $Config->getSystemVar('database_User');
+			$db_pass = $Config->getSystemVar('database_Pass');
+		}
 		
 		/* Connect to MySQL */
-		$this->dbPointer = new PDO('mysql:dbname=' . $db_name . '; host=' . $db_host, $db_user, $db_pass) or die("Failed to connect to mysql server");
-  		$this->dbPointer->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		if(strlen($db_host) > 0){
+			try {
+				$this->dbPointer = new PDO('mysql:dbname=' . $db_name . '; host=' . $db_host, $db_user, $db_pass);
+				$this->dbPointer->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+				
+				// Check to make sure the database tables are there
+				$result = $this->query("SELECT * FROM information_schema.tables WHERE TABLE_SCHEMA='" . $db_name . "'");
+				if(count($result) == 0){
+					// Nothing was returned. This is an error
+					Log::fatal("Mysql Connect: No tables in database. Cannot continue.");
+					die();
+				}
+			} catch(PDOException $e){
+				Log::fatal("Mysql Connect PDOException: Code: " . $e->getCode() . "\nMessage: " . htmlentities($e->getMessage()) . "\n");
+				die();
+			}
+		} else {
+			Log::error("Cannot connect to unknown host");
+		}
 	}
 	
 	public function query($query, $params = array()){
@@ -40,7 +69,7 @@ class Mysql {
 				$statement->execute($params);
 				return $statement->fetchAll(PDO::FETCH_CLASS);
 			} catch(PDOException $e){
-				Log::fatal("Mysql: query -- DB Error: '" . $e->getMessage() . "'");
+				Log::fatal("Mysql: query -- DB Query: '" . $query . "'          DB Error: '" . $e->getMessage() . "'");
 			}
 		}
 		
@@ -55,7 +84,7 @@ class Mysql {
 				$this->lastInsertId = $this->dbPointer->lastInsertId();
 				return $result;
 			} catch(PDOException $e){
-				Log::fatal("Mysql: insert -- DB Error: '" . $e->getMessage() . "'");
+				Log::fatal("Mysql: insert -- DB Query: '" . $query . "'          DB Error: '" . $e->getMessage() . "'");
 			}
 		}
 		
@@ -73,11 +102,29 @@ class Mysql {
 					return $statement->rowCount();
 				}
 			} catch(PDOException $e){
-				Log::fatal("Mysql: delete -- DB Error: '" . $e->getMessage() . "'");
+				Log::fatal("Mysql: delete -- DB Query: '" . $query . "'          DB Error: '" . $e->getMessage() . "'");
 			}
 		}
 		
 		return NULL;
+	}
+	
+	/**
+	 * Returns true if truncate is successful
+	 */
+	public function truncate($query, $params = array()){
+		if($this->dbPointer != NULL && isset($query) && $query != ""){
+			try {
+				$statement = $this->dbPointer->prepare($query);
+				if($statement->execute($params) == true){
+					true;
+				}
+			} catch(PDOException $e){
+				Log::fatal("Mysql: truncate -- DB Error: '" . $e->getMessage() . "'");
+			}
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -92,7 +139,7 @@ class Mysql {
 					return $statement->rowCount();
 				}
 			} catch(PDOException $e){
-				Log::fatal("Mysql: update -- DB Error: '" . $e->getMessage() . "'");
+				Log::fatal("Mysql: update -- DB Query: '" . $query . "'          DB Error: '" . $e->getMessage() . "'");
 			}
 		}
 		

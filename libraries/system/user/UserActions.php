@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -131,11 +131,11 @@ class UserActions {
 						}
 					} else {
 						Messages::setMessage($errorMessage, Define::get("MessageLevelError"));
-						Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+						Url::redirect(Url::home(), 3, false);
 					}
 				} else {
 					Messages::setMessage($errorMessage, Define::get("MessageLevelError"));
-					Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+					Url::redirect(Url::home(), 3, false);
 				}
 			}
 		} else {
@@ -254,7 +254,7 @@ class UserActions {
 							
 							if($mailer->send() == true){
 								Messages::setMessage("Request sent", Define::get("MessageLevelSuccess"));
-								Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+								Url::redirect(Url::home(), 3, false);
 							} else {
 								// TODO: Error
 							}
@@ -361,13 +361,13 @@ class UserActions {
 							if($user->save() == true){
 								PHPasswordPusher::removeCredentials($token);
 								Messages::setMessage("Your password has been reset", Define::get("MessageLevelSuccess"));
-								Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+								Url::redirect(Url::home(), 3, false);
 							} else {
 								// TODO: Error
 							}
 						} else {
-							Messages::setMessage($errorMessage, Define::get("MessageLevelError"));
-							Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+							Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
+							Url::redirect(Url::home(), 3, false);
 						}
 					}
 				}
@@ -377,5 +377,117 @@ class UserActions {
 		}
 	}
 	
+	public static function changePassword(){
+		global $Config;
+		
+		if(UserFunctions::getLoggedIn() != NULL){
+			$result = (Url::getParts('result') != NULL ? Url::getParts('result') : 0);
+			
+			if($result == 0){
+				?>
+				<script type="text/javascript">
+				function checkForm(){
+					if($("#inputCurrentPassword").val() == ""){
+						alert("You need to enter your current password");
+						return false;
+					} else if($("#inputNewPassword").val() == ""){
+						alert("You need to enter a new password");
+						return false;
+					} else if($("#inputConfirmNewPassword").val() == ""){
+						alert("You need to confirm your new password");
+						return false;
+					} else if($("#inputNewPassword").val() != $("#inputConfirmNewPassword").val()){
+						alert("Your passwords don't match");
+						return false;
+					}
+					
+					return true;
+				}
+				</script>
+				<form name="changePassForm" method="post" action="<?php echo (Define::get('baseSystem') == 1 ? Url::getAdminHttpBase() : Url::getHttpBase()); ?>/index.php?option=user&act=changePass&result=1" class="form-horizontal">
+					<fieldset>
+						<legend>Change Password</legend>
+						<div class="control-group">
+							<label class="control-label" for="inputCurrentPassword">Current Password</label>
+							<div class="controls">
+								<input type="password" name="inputCurrentPassword" id="inputCurrentPassword" placeholder="Current Password" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputNewPassword">New Password</label>
+							<div class="controls">
+								<input type="password" name="inputNewPassword" id="inputNewPassword" placeholder="New Password" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="inputConfirmNewPassword">Confirm New Password</label>
+							<div class="controls">
+								<input type="password" name="inputConfirmNewPassword" id="inputConfirmNewPassword" placeholder="Confirm Password" />
+							</div>
+						</div>
+						<div class="control-group">
+							<div class="controls">
+								<button type="submit" class="btn" onClick="return checkForm();">Change</button>
+							</div>
+						</div>
+					</fieldset>
+				</form>
+				<?php
+			}
+			
+			if($result == 1){
+				$info = Form::getParts();
+				$error = false;
+				$errorMessage = "";
+				
+				if(!isset($info['inputCurrentPassword']) || $info['inputCurrentPassword'] === ""){
+					$error = true;
+					$errorMessage = "Please enter your current password";
+				}
+				
+				if(UserFunctions::getLoggedIn()->passwordCorrect($info['inputCurrentPassword']) == false){
+					$error = true;
+					$errorMessage = "The current password you entered is invalid";
+				}
+				
+				if(!isset($info['inputCurrentPassword']) || $info['inputCurrentPassword'] === ""){
+					$error = true;
+					$errorMessage = "Please enter a Username";
+				}
+				
+				if(!isset($info['inputNewPassword']) || $info['inputNewPassword'] === ""){
+					$error = true;
+					$errorMessage = "Please enter a new password";
+				}
+				
+				if(!isset($info['inputConfirmNewPassword']) || $info['inputConfirmNewPassword'] === ""){
+					$error = true;
+					$errorMessage = "Please enter confirm your new password";
+				}
+				
+				if($error == false && ($info['inputNewPassword'] !== $info['inputConfirmNewPassword'])){
+					$error = true;
+					$errorMessage = "The new password you entered does not match";
+				}
+				
+				if($error == false){
+					UserFunctions::getLoggedIn()->setPassword($info['inputNewPassword']);
+					
+					if(UserFunctions::getLoggedIn()->save() == true){
+						Messages::setMessage("Your password has been changed", Define::get("MessageLevelSuccess"));
+						Url::redirect(Url::home(), 0, false);
+					} else {
+						// TODO: Error
+					}
+				} else {
+					Messages::setMessage($errorMessage, Define::get("MessageLevelError"));
+					Url::redirect("index.php?option=user&act=changePass", 0, false);
+				}
+			}
+		} else {
+			Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
+			Url::redirect(Url::home(), 3, false);
+		}
+	}
 }
 ?>

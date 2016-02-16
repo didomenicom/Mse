@@ -1,6 +1,6 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
  * @copyright 2008 - 2013 Mike Di Domenico
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
@@ -24,26 +24,30 @@ function Delete(){
 					echo Text::pageTitle("Delete Task");
 					?>
 					<script type="text/javascript">
-					function confirmDelete(){
-						bootbox.confirm("Are you sure you want to delete this?", function(result){
-							if(result == true){
-								$("#adminForm").submit();
-							}
-						}); 
-						
-						return false;
-					}
+					$(document).ready(function(){ 
+						$("#adminForm").submit(function(e){
+							bootbox.confirm("Are you sure you want to delete this?", function(result){
+								if(result == true){
+									$("#adminForm").submit();
+								}
+							}); 
+							
+							e.preventDefault();
+						});
+					});
 					
 					function cancel(){
-						window.location.replace("<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=manage");
+						window.location.replace("");
 					}
 					</script>
 					<form name="adminForm" id="adminForm" method="post" action="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=delete&id=<?php echo $id; ?>&result=1">
-						<?php echo $data->display(); ?>
-						<div class="controls">
-							<div class="form-actions">
-								<button type="submit" class="btn btn-primary" onClick="return confirmDelete();">Delete</button>
-								<button type="button" class="btn" onClick="return cancel();">Cancel</button>
+						<div style="padding:10px;">
+							<?php echo $data->display(); ?>
+						</div>
+						<div class="row">
+							<div class="form-group col-sm-5">
+								<button type="submit" class="btn btn-primary">Delete</button>
+								<a href="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=development&act=tasks&task=manage" class="btn btn-default">Cancel</a>
 							</div>
 						</div>
 					</form>
@@ -64,12 +68,12 @@ function Delete(){
 				Url::redirect(Url::getAdminHttpBase() . "/index.php?option=development&act=tasks&task=manage", 0, false);
 			}
 		} else {
-			Messages::setMessage("An unknown error has occured", Define::get("MessageLevelError"));
+			Messages::setMessage("An unknown error has occurred", Define::get("MessageLevelError"));
 			Url::redirect(Url::getAdminHttpBase() . "/index.php?option=development&act=tasks&task=manage", 0, false);
 		}
 	} else {
 		Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
-		Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+		Url::redirect(Url::home(), 3, false);
 	}
 }
 

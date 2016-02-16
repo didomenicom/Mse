@@ -1,14 +1,14 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
 function Edit(){
-	if(UserFunctions::getLoggedIn() != NULL && true == true){
+	if(UserFunctions::hasComponentAccess("config", "edit") == true){
 		$result = (Url::getParts('result') != NULL ? Url::getParts('result') : 0);
 		$com = (Url::getParts('com') !== "" ? Url::getParts('com') : NULL);
 		
@@ -16,318 +16,192 @@ function Edit(){
 			ImportClass("Component.Component");
 			ImportClass("Config.ConfigOptions");
 			
-			// Create the component class
-			$component = new Component($com);
-			
-			// Get all of the options
-			$filter['component'] = $component->getId();
-			$configItems = new ConfigOptions($filter);
-			
-			if($result == 0){
-				// Display the page text
-				echo Text::pageTitle($component->getName(1) . " Configuration");
-				?>
-				<script type="text/javascript">
-				$(document).ready(function(){ 
-					$(".inputInteger").change(function(e){
-						var intTest = /^[0-9]+$/;
-
-						if(intTest.test($(this).val())){
-							if($(this).parentsUntil("control-group").hasClass("error")){
-								$(this).parentsUntil("control-group").removeClass("error");
-							}
-						} else {
-							$(this).parentsUntil("control-group").addClass("error");
-						}
-					});
-					
-					$(".inputDouble").change(function(e){
-						var doubleTest = /^(([0-9]+\.[0-9]+)|([0-9]+))$/;
-
-						if(doubleTest.test($(this).val())){
-							if($(this).parentsUntil("control-group").hasClass("error")){
-								$(this).parentsUntil("control-group").removeClass("error");
-							}
-						} else {
-							$(this).parentsUntil("control-group").addClass("error");
-						}
-					});
-					
-					$(".inputDate").change(function(e){
-						var dateTest = /^((0?[1-9]|1[012])[- \/.](0?[1-9]|[12][0-9]|3[01])[- \/.](19|20)?[0-9]{2})*$/; // TODO: Handle no character between numbers 
-
-						if(dateTest.test($(this).val())){
-							if($(this).parentsUntil("control-group").hasClass("error")){
-								$(this).parentsUntil("control-group").removeClass("error");
-							}
-						} else {
-							$(this).parentsUntil("control-group").addClass("error");
-						}
-					});
-					
-					$(".icon-remove").click(function(e){
-						var id = $(this).attr('id');
-
-						if(id !== ""){
-							if(!$(this).hasClass("icon-white")){
-								bootbox.confirm("Are you sure you want to delete this?", function(result){
-									if(result == true){
-										// TODO: Complete 
-									}
-								}); 
-							}
-						}
-					});
-				});
-
-				function checkForm(){
-					if($("#inputComponent").val() == ""){
-						$("#formMessages").html("You need to enter a comonent").removeClass("hidden");
-						return false;
-					} else if($("#inputType").val() == ""){
-						$("#formMessages").html("You need to select a type").removeClass("hidden");
-						return false;
-					} else if($("#inputName").val() == ""){
-						$("#formMessages").html("You need to enter a name").removeClass("hidden");
-						return false;
-					}
-					
-					return true;
-				}
+			// Check if the component exists
+			if(Component::exists($com) == true){
+				// Create the component class
+				$component = new Component($com);
 				
-				function cancel(){
-					window.location.replace("<?php echo Url::getAdminHttpBase(); ?>/index.php?option=config&act=manage"); // TODO: 
-				}
-				</script>
-				<div id="formMessages" class="alert alert-error hidden"></div>
-				<form name="adminForm" id="adminForm" method="post" action="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=config&act=edit&com=<?php echo $com; ?>&result=1">
-					<?php 
-					// Display all of the config options
-					if($configItems->rowsExist()){
-						while($configItems->hasNext()){
-							$row = $configItems->getNext();
-							
-							?>
-					<div class="control-group">
-						<label class="control-label" for="inputConfigOption[<?php echo $row->getId(); ?>]"><?php echo $row->getName(); ?></label>
-						<div class="controls">
-							<?php 
-							if($row->getType() == 1){ // Integer
-							?>
-							<input type="text" class="inputInteger" name="inputConfigOption[<?php echo $row->getId(); ?>]" id="inputConfigOption[<?php echo $row->getId(); ?>]" value="<?php echo $row->getValue(); ?>" />
-							<?php 
-							}
-							
-							if($row->getType() == 2){ // Double
-								// TODO: Add sig figs option 
-							?>
-							<input type="text" class="inputDouble" name="inputConfigOption[<?php echo $row->getId(); ?>]" id="inputConfigOption[<?php echo $row->getId(); ?>]" value="<?php echo $row->getValue(); ?>" />
-							<?php 
-							}
-							
-							if($row->getType() == 3){ // Array
-								// Break the options array apart ('|' is the deliminator)
-								$optionsArray = explode("|", $row->getOptions());
-								$options = array();
+				// Get all of the options
+				$filter['component'] = $component->getId();
+				$configItems = new ConfigOptions($filter);
+				
+				if($result == 0){
+					// Get the files
+					ImportFile(Url::getAdminDirBase() . DS . "pages/system/config/EditInteger.php");
+					ImportFile(Url::getAdminDirBase() . DS . "pages/system/config/EditDouble.php");
+					ImportFile(Url::getAdminDirBase() . DS . "pages/system/config/EditArray.php");
+					ImportFile(Url::getAdminDirBase() . DS . "pages/system/config/EditTextBox.php");
+					ImportFile(Url::getAdminDirBase() . DS . "pages/system/config/EditTextArea.php");
+					ImportFile(Url::getAdminDirBase() . DS . "pages/system/config/EditWYSIWYG.php");
+					ImportFile(Url::getAdminDirBase() . DS . "pages/system/config/EditDate.php");
+					ImportFile(Url::getAdminDirBase() . DS . "pages/system/config/EditOption.php");
+					ImportFile(Url::getAdminDirBase() . DS . "pages/system/config/EditTrueFalse.php");
+					
+					// Display the page text
+					echo Text::pageTitle($component->getDisplayName(1) . " Configuration");
+					
+					$arrayIds = array();
+					
+					// Add the headers
+					EditIntegerHeader();
+					EditDoubleHeader();
+					EditArrayHeader();
+					EditTextBoxHeader();
+					EditTextAreaHeader();
+					EditDateHeader();
+					EditOptionHeader();
+					EditTrueFalseHeader();
+					EditWYSIWYGHeader();
+					?>
+					<script type="text/javascript">
+					function checkForm(){
+						return true;
+					}
+					</script>
+					
+					<script type="text/javascript">
+					function cancel(){
+						window.location.replace("<?php echo Url::getAdminHttpBase(); ?>/index.php?option=config&act=manage"); // TODO: Set the cancel button based on the component parameter 
+					}
+					</script>
+					<div id="formMessages" class="alert alert-error hidden"></div>
+					<form name="adminForm" id="adminForm" method="post" action="<?php echo Url::getAdminHttpBase(); ?>/index.php?option=config&act=edit&com=<?php echo $com; ?>&result=1">
+						<?php 
+						// Display all of the config options
+						if($configItems->rowsExist()){
+							while($configItems->hasNext()){
+								$row = $configItems->getNext();
 								
-								// Break apart the name and display name (Format: DisplayName(name))
-								for($i = 0; $i < count($optionsArray); $i++){
-									// Extract the name/display name
-									preg_match_all("([0-9a-zA-Z]+)", $optionsArray[$i], $nameParts);
-									
-									if(count($nameParts[0]) > 0){
-										list($options[$i]['displayName'], $options[$i]['name']) = $nameParts[0];
-									}
+								?>
+						<div class="control-group">
+							<label class="control-label<?php echo (strlen($row->getComment()) > 0 ? " toolTipClass" : ""); ?>" for="inputConfigOption[<?php echo $row->getId(); ?>]" title="<?php echo (strlen($row->getComment()) > 0 ? $row->getComment() : ""); ?>"><?php echo $row->getName(); ?></label>
+							<div class="controls">
+								<?php 
+								if($row->getType() == 1){ // Integer
+									// Add the body
+									EditIntegerContent($row);
 								}
 								
-								// Break the values array apart ('|' is deliminator)
-								$parts = explode("|", $row->getValue());
+								if($row->getType() == 2){ // Double
+									// Add the body
+									EditDoubleContent($row);
+								}
 								
-							?>
-							<div class="input-large">
-								<table class="table table-bordered table-striped table-hover">
-									<thead>
-										<tr>
-											<?php 
-											$columnCount = 1;
-											
-											foreach($options as $option){
-											?>
-											<th>
-												<?php echo $option['displayName']; ?>
-											</th>
-											<?php 
-												$columnCount++;
-											}
-											?>
-											<th>
-												
-											</th>
-										</tr>
-									</thead>
-									<tbody>
-								<?php	
-								for($i = 0; $i < count($parts); $i++){
-									// Extract the name and type
-									preg_match_all("([0-9a-zA-Z]+)", $parts[$i], $rowPartsArray);
+								if($row->getType() == 3){ // Array
+									// Add the body
+									EditArrayContent($row);
 									
-									if(count($rowPartsArray) > 0){
-										
-										?>
-										<tr>
-											<?php 
-											foreach($rowPartsArray[0] as $rowPart){
-											?>
-											<td>
-												<?php echo $rowPart; ?>
-											</td>
-											<?php 
-											}
-											?>
-											<td>
-												<?php 
-												$canDelete = true;
-												
-												if($row->getDeleteCheck() !== ""){
-													// There is a function defined
-													// Load the function 
-													// Break apart the path
-													$deleteCheckParts = explode("/", $row->getDeleteCheck());
-														
-													// Check if it is in valid format
-													if(count($deleteCheckParts) > 0){
-														$filename = array_pop($deleteCheckParts);
-													
-														// Check if the first part is "system"... system directory compared to the user directory
-														$filePath = (strtolower(array_shift($deleteCheckParts)) === "system" ? "system".DS : "user".DS) . "configHandler".DS;
-													
-														foreach($deleteCheckParts as $deleteCheckPart){
-															$filePath .= strtolower($deleteCheckPart).DS;
-														}
-													
-														// Build path
-														if(ImportFile(BASEPATH.DS.LIBRARY.DS . $filePath . $filename . ".php") == true){
-															// Found and grabbed the file
-															// Execute it
-															$canDelete = DeleteCheck($row->getId() . "_" . $i);
-														}
-													}
-												}
-												
-												if($canDelete){
-												?>
-												<i id="<?php echo $row->getId() . "_" . $i; ?>" class="icon-remove"></i>
-												<?php 
-												} else {
-												?>
-												<i id="<?php echo $row->getId() . "_" . $i; ?>" class="icon-white icon-remove"></i>
-												<?php 
-												}
-												?>
-											</td>
-										</tr>
-										<?php
-									}
+									array_push($arrayIds, $row->getId());
+								}
+								
+								if($row->getType() == 4){ // Text Box
+									// Add the body
+									EditTextBoxContent($row);
+								}
+								
+								if($row->getType() == 5){ // Text Area
+									// Add the body
+									EditTextAreaContent($row);
+								}
+								
+								if($row->getType() == 6){ // Date
+									// Add the body
+									EditDateContent($row);
+								}
+								
+								if($row->getType() == 7){ // Option
+									// Add the body
+									EditOptionContent($row);
+									
+									array_push($arrayIds, $row->getId());
+								}
+								
+								if($row->getType() == 8){ // True/False
+									// Add the body
+									EditTrueFalseContent($row);
+								}
+								
+								if($row->getType() == 9){ // WYSIWYG
+									// Add the body
+									EditWYSIWYGContent($row);
 								}
 								?>
-									</tbody>
-									<tfoot>
-										<tr>
-											<td colspan="<?php echo $columnCount; ?>">
-												<i class="icon-plus"></i> Add
-											</td>
-										</tr>
-									</tfoot>
-								</table>
 							</div>
-							
-							<?php 
-							}
-							
-							if($row->getType() == 4){ // Text Box
-							?>
-							<input type="text" name="inputConfigOption[<?php echo $row->getId(); ?>]" id="inputConfigOption[<?php echo $row->getId(); ?>]" value="<?php echo $row->getValue(); ?>" />
-							<?php 
-							}
-							
-							if($row->getType() == 5){ // Text Area
-							?>
-							<textarea name="inputConfigOption[<?php echo $row->getId(); ?>]" id="inputConfigOption[<?php echo $row->getId(); ?>]"><?php echo $row->getValue(); ?></textarea>
-							<?php 
-							}
-							
-							if($row->getType() == 6){ // Date
-							?>
-							<div class="input-append">
-								<input type="text" class="inputDate" name="inputConfigOption[<?php echo $row->getId(); ?>]" id="inputConfigOption[<?php echo $row->getId(); ?>]" value="<?php echo $row->getValue(); ?>" />
-								<span class="add-on"><i class="icon-calendar"></i></span>
-							</div>
-							<?php 
-							}
-													
-							if($row->getType() == 7){ // Option
-								// TODO: Implement
-							?>
-							Options not supported yet
-							<?php 
-							}
-							?>
 						</div>
-					</div>
-							<?php 
+								<?php 
+							}
 						}
-					}
-					
-					?>
-					<div class="controls">
-						<div class="form-actions">
-							<button type="submit" class="btn btn-primary" onClick="return checkForm();">Save changes</button>
-							<button type="button" class="btn" onClick="return cancel();">Cancel</button>
+						
+						?>
+						<div class="controls">
+							<div class="form-actions">
+								<button type="submit" class="btn btn-primary" onClick="return checkForm();">Save changes</button>
+								<button type="button" class="btn" onClick="return cancel();">Cancel</button>
+							</div>
 						</div>
-					</div>
-				</form>
-				<?php
-			}
-			
-			if($result == 1){
-				$info = Form::getParts();
-				$error = false;
-				$errorMessage = "";
-				
-				if(!isset($info['inputComponent']) || $info['inputComponent'] === ""){
-					$error = true;
-					$errorMessage = "Please enter a component";
+						<script type="text/javascript">
+						$(document).ready(function(){ 
+							// Enable the tooltips on the tooltipClass class 
+							$(".tooltipClass").tooltip();
+						});
+						
+						<?php
+						if(count($arrayIds) > 0){
+							foreach($arrayIds as $id){
+							?>
+						generateArrayTypeDisplay($("#arrayTableHeader_<?php echo $id; ?>"), $('input[name="inputConfigOption[<?php echo $id; ?>]"]'), $("#arrayTableDisplay_<?php echo $id; ?>"));
+							<?php
+							}
+						}
+						?>
+						</script>
+					</form>
+					<?php
 				}
 				
-				if($error == false){
-					// Save it
-					$data->setComponent($info['inputComponent']);
-					$data->setType($info['inputType']);
-					$data->setName($info['inputName']);
+				if($result == 1){
+					$info = Form::getParts();
+					$error = false;
 					
-					if($data->save() == true){
-						if($id > 0){
-							Messages::setMessage("Config Saved", Define::get("MessageLevelSuccess"));
-						} else {
-							Messages::setMessage("Config Added", Define::get("MessageLevelSuccess"));
+					foreach($info['inputConfigOption'] as $key => $value){
+						// Check if the key exists
+						if(ConfigOption::exists($component->getId(), $key) == true){
+							$cfgOption = new ConfigOption($key);
+							
+							// TODO: This is a temporary workaround to magic_quotes_gpc enabled
+							if(ini_get('magic_quotes_gpc') === "1"){
+								$cfgOption->setValue(stripslashes($value));
+							} else {
+								$cfgOption->setValue($value);
+							}
+							
+							if($cfgOption->save() == false){
+								$error = true;
+							}
 						}
-					} else {
-						Messages::setMessage("Config NOT Saved!", Define::get("MessageLevelError"));
 					}
 					
-					Url::redirect(Url::getAdminHttpBase() . "/index.php?option=development&act=configGenerator&task=manage", 0, false); // TODO: 
-				} else {
-					Messages::setMessage($errorMessage, Define::get("MessageLevelError"));
+					if($error == false){
+						Messages::setMessage("Configuration Saved.", Define::get("MessageLevelSuccess"));
+					} else {
+						Messages::setMessage("There was an error saving the configuration", Define::get("MessageLevelError"));
+					}
+					
 					Url::redirect(Url::getAdminHttpBase() . "/index.php?option=config&act=edit&com=" . $com, 0, false);
 				}
+			} else {
+				// Component Doesn't Exist
+				Messages::setMessage("The component doesn't exist", Define::get("MessageLevelError"));
+				Url::redirect(Url::getAdminHttpBase() . "/index.php", 0, false);
 			}
 		} else {
 			// No component specified
-			// TODO: Error
+			Messages::setMessage("An unknown error has occurred", Define::get("MessageLevelError"));
+			Url::redirect(Url::getAdminHttpBase() . "/index.php", 0, false);
 		}
 	} else {
 		Messages::setMessage("Permission Denied", Define::get("MessageLevelError"));
-		Url::redirect(UserFunctions::getLoginUrl(), 0, false);
+		Url::redirect(Url::home(), 3, false);
 	}
 }
 

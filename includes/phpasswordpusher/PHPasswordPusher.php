@@ -1,9 +1,9 @@
 <?php
 /**
- * MseBase - PHP system to develop web applications
+ * Mse - PHP development framework for web applications
  * @author Mike Di Domenico
- * @copyright 2008 - 2013 Mike Di Domenico
- * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @copyright 2008 - 2016 Mike Di Domenico
+ * @license https://opensource.org/licenses/MIT
  */
 defined("Access") or die("Direct Access Not Allowed");
 
@@ -26,6 +26,7 @@ class PHPasswordPusher {
 		return Miscellaneous::generateRandomString(8) . "-" . Miscellaneous::generateRandomString(4) . "-" . Miscellaneous::generateRandomString(4) . "-" . Miscellaneous::generateRandomString(4) . "-" . Miscellaneous::generateRandomString(12);
 //		uuid_create(&$context);
 //		uuid_create(&$namespace);
+		
 		
 		// Creates a UUID based on a unique ID based on time in milliseconds.
 		// The uniqid function is using the more_entropy = true option.
@@ -322,11 +323,21 @@ class PHPasswordPusher {
 	}
 	
 	public static function createCredential($inputData){
-		global $Config; 
+		global $Config, $db; 
 		
 		if(isset($inputData) && $inputData !== ""){
+			$execute = true;
+			while($execute == true){
+				$uniqueId = PHPasswordPusher::getUniqueId();
+				$result = $db->fetchAssoc("SELECT * FROM passwordPusher WHERE id='" . $uniqueId . "'");
+				
+				if(isset($result->id) && $result->id === $uniqueId){
+					// TODO: Log this hit
+				} else {
+					$execute = false;
+				}
+			}
 			
-			$uniqueId = PHPasswordPusher::getUniqueId();
 			if(PHPasswordPusher::insertCredential($uniqueId, $inputData, $Config->getSystemVar('expirationTimeDefault'), $Config->getSystemVar('expirationViewsDefault')) == true){
 				return $uniqueId;
 			}
@@ -383,6 +394,14 @@ class PHPasswordPusher {
 			if($result == 1){
 				return true;
 			}
+		}
+		
+		return false;
+	}
+	
+	public static function stringInCorrectFormat($inputString){
+		if(($result = preg_match("/([\w\d]{8}-[\w\d]{4}-[\w\d]{4}-[\w\d]{4}-[\w\d]{12})/", $inputString, $matches)) === 1){
+			return true;
 		}
 		
 		return false;
